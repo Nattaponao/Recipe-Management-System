@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^7.3.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
@@ -17,7 +18,6 @@
     "lucide-react": "^0.562.0",
     "next": "16.1.4",
     "pnpm": "^10.28.1",
-    "prisma": "^7.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
@@ -38,6 +38,8 @@
     "nodemon": "^3.1.11",
     "prettier": "^3.8.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "prisma": "^7.3.0",
+    "prisma-markdown": "^4.0.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
