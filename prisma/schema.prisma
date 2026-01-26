@@ -35,3 +35,10 @@ model Recipe {
   instructions String
   createdAt    DateTime @default(now())
 }
+
+// Normalize DB
+model Ingredient {
+  id       Int
+  name     String
+  recipeId Int
+}
