@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { defineConfig, env } from 'prisma/config'
+import { defineConfig, env } from '@prisma/config'
 
 type Env = { DATABASE_URL: string }
 
