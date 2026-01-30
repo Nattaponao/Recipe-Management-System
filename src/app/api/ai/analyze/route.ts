@@ -13,8 +13,26 @@ export async function POST(req: Request) {
   try {
     const { userIngredients } = await req.json();
 
-    // ดึงข้อมูลสูตรอาหารจาก Database
+    // กัน api พัง FE ส่งข้อมูลมั่ว
+    if (!Array.isArray(userIngredients) || userIngredients.length === 0) {
+      return NextResponse.json(
+        { error: 'userIngredients must be a non-empty array' },
+        { status: 400 },
+      );
+    }
+
+    // กันบัคแฝง
+    const invalidItem = userIngredients.find((i) => typeof i !== 'string');
+    if (invalidItem) {
+      return NextResponse.json(
+        { error: 'userIngredients must be an array of strings only' },
+        { status: 400 },
+      );
+    }
+
+    // ดึงข้อมูลสูตรอาหารจาก Database (โดยที่จำกัดสูตรที่ 159 สูตร)
     const recipes = await prisma.recipe.findMany({
+      take: 159,
       select: {
         id: true,
         name: true,
@@ -71,14 +89,27 @@ export async function POST(req: Request) {
       2. คำนวณ matchScore (0-100) ตามจำนวนวัตถุดิบที่มี
       3. ระบุวัตถุดิบที่ขาด (missingIngredients)
       4. ให้เหตุผลประกอบสั้นๆ (reason)
+
+      สำคัญ:
+      - ห้ามเดาส่วนผสมที่ไม่อยู่ใน instructions
+      - ถ้า instructions ไม่ชัด ให้ใส่ missingIngredients เป็น ["ไม่ระบุ"]
     `;
 
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      return NextResponse.json(
+        { error: 'AI response is not valid JSON', raw: text },
+        { status: 500 },
+      );
+    }
 
     // ส่งข้อมูลกลับไปที่ Frontend
-    return NextResponse.json(JSON.parse(text));
+    return NextResponse.json(parsed);
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
