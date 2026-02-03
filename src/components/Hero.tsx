@@ -6,7 +6,7 @@ function HeroPage() {
     <div className="bg-[#637402] pb-14">
       <div className="flex flex-col md:flex-row justify-between items-center text-white">
         <div className="pl-6 md:pl-19  w-full md:w-auto ">
-          <div className="text-[48px] font-semibold leading-tight md:text-[100px] md:leading-28 mb-8 md:mb-16 md:pt-10">
+          <div className="text-[48px] font-semibold leading-tight md:text-[100px] md:leading-28 mb-8 md:mb-16 md:pt-10e">
             <h1>Pad Krapao</h1>
             <h1>Moo sub</h1>
           </div>
