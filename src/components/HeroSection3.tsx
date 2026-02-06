@@ -13,8 +13,8 @@ function HeroSection() {
             </div>
           </div>
           <div className='grid grid-cols-6 mt-16 place-items-center mb-16 text-[#101010]'>
-            <div className='flex flex-col items-center gap-3'>
-              <div className='p-7 bg-[#DFD3A4] rounded-3xl'><svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 384 512"><path fill="#637402" d="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208m-37.2-362c6.5-6 7-16.1 1-22.6s-16.1-7-22.6-1c-23.9 21.8-41.1 52.7-52.3 84.2S64 259.7 64 288c0 8.8 7.2 16 16 16s16-7.2 16-16c0-24.5 5-54.4 15.1-82.8c10.1-28.5 25-54.1 43.7-71.2" strokeWidth="13" stroke="#637402" /></svg></div>
+            <div className='flex flex-col items-center gap-3 '>
+              <div className='p-7 bg-[#DFD3A4] rounded-3xl '><svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 384 512"><path fill="#637402" d="M192 496C86 496 0 394 0 288C0 176 64 16 192 16s192 160 192 272c0 106-86 208-192 208m-37.2-362c6.5-6 7-16.1 1-22.6s-16.1-7-22.6-1c-23.9 21.8-41.1 52.7-52.3 84.2S64 259.7 64 288c0 8.8 7.2 16 16 16s16-7.2 16-16c0-24.5 5-54.4 15.1-82.8c10.1-28.5 25-54.1 43.7-71.2" strokeWidth="13" stroke="#637402" /></svg></div>
               <p className='text-[21px] font-semibold'>Breakfast</p>
             </div>
              <div className='flex flex-col items-center gap-3'>
@@ -47,8 +47,8 @@ function HeroSection() {
               <hr className='w-full'/>
               <h1 className='text-[106px] font-semibold '>Popular</h1>     
             </div> 
-            <div className='grid grid-cols-5  mt-10 place-items-center'>
-              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60'>
+            <div className='grid grid-cols-5  mt-10 place-items-center cards-focus '>
+              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
                 <div className='w-60'>
                   <Image
                     src='/GreenCurry.png'
@@ -63,7 +63,7 @@ function HeroSection() {
                   <p className='text-[#B0B0B0] text-[14px] leading-5'>All green and fresh soup</p>
                 </div>
               </div>
-             <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60'>
+             <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
                 <div className='w-60'>
                   <Image
                     src='/GreenCurry.png'
@@ -78,7 +78,7 @@ function HeroSection() {
                   <p className='text-[#B0B0B0] text-[14px] leading-5'>Gluten free with potato crust!</p>
                 </div>
               </div>
-              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60'>
+              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
                 <div className='w-60'>
                   <Image
                     src='/GreenCurry.png'
@@ -93,7 +93,7 @@ function HeroSection() {
                   <p className='text-[#B0B0B0] text-[14px] leading-5'>Easy one-pot meal for dinners.</p>
                 </div>
               </div>
-              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60'>
+              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
                 <div className='w-60'>
                   <Image
                     src='/GreenCurry.png'
@@ -108,7 +108,7 @@ function HeroSection() {
                   <p className='text-[#B0B0B0] text-[14px] leading-5'>Fancy flavors and textures you need to try.</p>
                 </div>
               </div>
-             <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60'>
+             <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
                 <div className='w-60'>
                   <Image
                     src='/GreenCurry.png'
