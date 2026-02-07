@@ -14,7 +14,7 @@ export default function LogoutButton() {
 
   return (
     <button
-      onClick={logout}
+      onClick={logout}  className="inline-block bg-red-800 text-[#E4D7AA] font-extralight text-[16px] py-2 px-5 mt-5 mb-3 rounded-3xl cursor-pointer"
       
     >
       Logout
