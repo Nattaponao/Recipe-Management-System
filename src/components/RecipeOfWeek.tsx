@@ -22,12 +22,13 @@ function RecipeOfWeek() {
             <h1 className='text-[30px] font-semibold'>Recipe of Week</h1>
             <div className='flex justify-center'>
               <div className=''>
-                <div className='my-7'>
+                <div className='my-7 group overflow-hidden '>
                   <Image
                     src='/GreenSweet.jpeg'
                     alt='GreenSweet'
                     width={520}
                     height={500}
+                    className='transition-transform duration-300 ease-out group-hover:scale-105'
                   />
                 </div>
                 <div className='flex justify-between items-center'>
@@ -41,13 +42,13 @@ function RecipeOfWeek() {
                 </div>
                 <hr className='border border-[#DFD3A4] my-6' />
                 <div className='flex items-center gap-4'>
-                  <div className="w-13 h-13 rounded-full overflow-hidden ">
+                  <div className="w-13 h-13 rounded-full  overflow-hidden ">
                     <Image
                       src="/person01.jpeg"
                       alt="person"
                       width={48}
                       height={48}
-                      className="object-cover"
+                      className="object-cover "
                     />
                   </div>
                   <div>
@@ -63,13 +64,13 @@ function RecipeOfWeek() {
           <div className="flex flex-col h-full justify-between ">
             <div>
               <div className='flex bg-[#FEFEF6] px-4 rounded-xl '>
-                <div className='w-[550px]'>
+                <div className='w-[550px] group overflow-hidden'>
                   <Image
                     src='/tomyum.jpeg'
                     alt='Noodle'
                     width={275}
                     height={275}
-                    className='object-cover h-full'
+                    className='object-cover h-full transition-transform duration-300 ease-out group-hover:scale-105'
 
                   />
                 </div>
@@ -92,7 +93,7 @@ function RecipeOfWeek() {
                         alt='person'
                         width={38}
                         height={38}
-                        className="object-cover w-full"
+                        className="object-cover w-full "
                       />
                     </div>
                     <div className='text-[14px] font-semibold'>
@@ -106,13 +107,13 @@ function RecipeOfWeek() {
             </div>
             <div className=''>
               <div className='flex bg-[#FEFEF6] px-4 rounded-xl '>
-                <div className='w-[550px]'>
+                <div className='w-[550px] group overflow-hidden'>
                   <Image
                     src='/01.jpeg'
                     alt='Noodle'
                     width={275}
                     height={275}
-                    className='object-cover h-full'
+                    className='object-cover h-full transition-transform duration-300 ease-out group-hover:scale-105'
 
                   />
                 </div>
@@ -150,13 +151,13 @@ function RecipeOfWeek() {
             </div>
             <div>
               <div className='flex bg-[#FEFEF6] px-4 rounded-xl '>
-                <div className='w-[550px]'>
+                <div className='w-[550px] group overflow-hidden'>
                   <Image
                     src='/padthai.jpeg'
                     alt='Noodle'
                     width={275}
                     height={275}
-                    className='object-cover h-full'
+                    className='object-cover h-full transition-transform duration-300 ease-out group-hover:scale-105'
                   />
                 </div>
                 <div className='p-5 w-full'>

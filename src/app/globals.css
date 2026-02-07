@@ -27,3 +27,49 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ===== 3D card focus + neighbors tilt (refined) ===== */
+.cards-focus {
+  perspective: 1400px;
+}
+
+.cards-focus .card {
+  transform: translateZ(0) scale(0.92);
+  opacity: 0.92;
+  filter: none;
+  transition:
+    transform 360ms ease,
+    opacity 360ms ease,
+    filter 360ms ease,
+    box-shadow 360ms ease;
+  will-change: transform, opacity, filter, box-shadow;
+}
+
+/* เมื่อมีการ hover ใบใดใบหนึ่ง -> ทุกใบถอย/จาง */
+.cards-focus:has(.card:hover) .card {
+  transform: translateZ(-60px) scale(0.88);   /* ↓ ถอยน้อยลง */
+  opacity: 0.5;                               /* ↑ ชัดขึ้นนิด */
+  filter: blur(0.5px) saturate(0.85);         /* blur เบาลง */
+}
+
+/* ใบที่ hover -> ยกน้อยลง + ซูมพอดี + เงานุ่ม */
+.cards-focus:has(.card:hover) .card:hover {
+  transform: translateZ(110px) scale(1.05);   /* ↓ จาก 170 → 110 */
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 22px 45px rgba(0,0,0,.25);    /* เงาเพิ่ม */
+}
+
+/* ใบขวา (เพื่อนบ้าน) */
+.cards-focus:has(.card:hover) .card:hover + .card {
+  transform: translateZ(30px) scale(0.96) rotateY(-12deg) translateX(14px);
+  opacity: 0.78;
+  filter: none;
+}
+
+/* ใบซ้าย (เพื่อนบ้าน) */
+.cards-focus .card:has(+ .card:hover) {
+  transform: translateZ(30px) scale(0.96) rotateY(12deg) translateX(-14px);
+  opacity: 0.78;
+  filter: none;
+}
