@@ -4,6 +4,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
 }
 
 model Post {
@@ -11,8 +19,8 @@ model Post {
   title     String
   content   String?
   published Boolean @default(false)
-  authorId  Int
   author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int
 }
 
 model Recipe {
@@ -20,12 +28,4 @@ model Recipe {
   name         String
   instructions String
   createdAt    DateTime @default(now())
-}
-
-model User {
-  id              Int     @id @default(autoincrement())
-  email           String  @unique
-  name            String?
-  password_hashed String?
-  posts           Post[]
 }
