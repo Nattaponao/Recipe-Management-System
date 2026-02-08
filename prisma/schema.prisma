@@ -8,10 +8,11 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+  id              Int     @id @default(autoincrement())
+  email           String  @unique
+  name            String?
+  password_hashed String?
+  posts           Post[]
 }
 
 model Post {
@@ -19,13 +20,40 @@ model Post {
   title     String
   content   String?
   published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
   authorId  Int
+  author    User    @relation(fields: [authorId], references: [id])
 }
 
-model Recipe {
-  id           Int      @id @default(autoincrement())
-  name         String
-  instructions String
-  createdAt    DateTime @default(now())
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model recipe_ingredients {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipe_id  String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String?
+  amount     Decimal? @db.Decimal
+  unit       String?
+  sort_order BigInt?
+  recipes    recipes? @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model recipe_steps {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipe_id String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  step_no   BigInt?
+  text      String?
+  recipes   recipes? @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model recipes {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at         DateTime             @default(now()) @db.Timestamptz(6)
+  name               String?              @default("")
+  description        String?
+  cover_image        String?
+  category           String?
+  country            String?
+  tags               String?
+  recipe_ingredients recipe_ingredients[]
+  recipe_steps       recipe_steps[]
 }
