@@ -1,7 +1,8 @@
-import { Recipe } from '@/types/recipe';
+// import { Recipe } from '@/types/recipe';
+import { AIRecipeInput } from '@/types/ai';
 
 export function buildAnalyzePrompt(
-  recipes: Recipe[],
+  recipes: AIRecipeInput[],
   userIngredients: string[],
 ) {
   return `

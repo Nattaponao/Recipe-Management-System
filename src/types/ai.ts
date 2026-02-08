@@ -5,3 +5,10 @@ export type AIAnalyzeResult = {
   missingIngredients: string[];
   reason: string;
 };
+
+export type AIRecipeInput = {
+  id: string;
+  name: string;
+  ingredients: string[];
+  steps: string[];
+};
