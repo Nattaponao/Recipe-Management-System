@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import Image from 'next/image';
 
 type AIResult = {
@@ -13,17 +13,38 @@ type AIResult = {
 };
 
 export default function AIPage() {
-  const [query, setQuery] = useState('');
+  const [input, setInput] = useState('');
+  const [ingredients, setIngredients] = useState<string[]>([]);
   const [results, setResults] = useState<AIResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async () => {
-    const ingredients = query
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
+  // ➕ เพิ่ม ingredient ด้วย Enter
+  const addIngredient = () => {
+    const value = input.trim();
+    if (!value) return;
 
+    if (!ingredients.includes(value)) {
+      setIngredients((prev) => [...prev, value]);
+    }
+    setInput('');
+  };
+
+  // ⌨️ กด Enter
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addIngredient();
+    }
+  };
+
+  // ❌ ลบ ingredient
+  const removeIngredient = (name: string) => {
+    setIngredients((prev) => prev.filter((i) => i !== name));
+  };
+
+  // 🔍 ค้นหา AI
+  const handleSearch = async () => {
     if (ingredients.length === 0) return;
 
     try {
@@ -51,34 +72,62 @@ export default function AIPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-lime-800 to-lime-700 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-lime-800 to-lime-700 text-white">
       {/* HERO */}
-      <section className="text-center py-20 px-4">
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight">
+      <section className="text-center pt-24 pb-12 px-4">
+        <h1 className="text-6xl md:text-7xl font-extrabold text-yellow-400">
           AI Chef
         </h1>
-        <p className="mt-4 text-lg text-lime-100">
-          Let AI turn your ingredients into delicious recipes
+
+        <p className="mt-4 text-lg text-lime-100 max-w-2xl mx-auto">
+          “No more menu headaches! Let AI Super Chef turn your ingredients into
+          recipes.”
         </p>
 
-        {/* SEARCH */}
-        <div className="mt-8 flex justify-center gap-3">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="ใส่วัตถุดิบ เช่น ไข่, ข้าว, กระเทียม"
-            className="w-72 md:w-96 px-4 py-3 rounded-xl text-black outline-none shadow-lg"
-          />
+        {/* SEARCH BAR */}
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <div className="flex items-center gap-3 w-full max-w-3xl">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="พิมพ์วัตถุดิบแล้วกด Enter"
+              className="flex-1 bg-white text-gray-700 px-5 py-3 rounded-md shadow-md outline-none placeholder:text-gray-400"
+            />
 
-          <button
-            onClick={handleSearch}
-            className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-6 py-3 rounded-xl shadow-lg transition active:scale-95"
-          >
-            ค้นหา
-          </button>
+            <button
+              onClick={handleSearch}
+              className="bg-yellow-400 hover:bg-yellow-300 text-black rounded-full w-12 h-12 flex items-center justify-center shadow-md transition active:scale-95"
+            >
+              ➤
+            </button>
+          </div>
+
+          {/* INGREDIENT CHIPS */}
+          {ingredients.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-3 max-w-2xl">
+              {ingredients.map((item) => (
+                <div
+                  key={item}
+                  className="bg-white text-gray-700 px-4 py-2 rounded-full shadow text-sm flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-black rounded-full" />
+
+                  {item}
+
+                  <button
+                    onClick={() => removeIngredient(item)}
+                    className="text-gray-400 hover:text-red-500 ml-1"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {error && <p className="text-red-200 mt-2">{error}</p>}
         </div>
-
-        {error && <p className="mt-4 text-red-200">{error}</p>}
       </section>
 
       {/* LOADING */}
@@ -102,7 +151,7 @@ export default function AIPage() {
                   alt={r.recipeName}
                   width={400}
                   height={160}
-                  className="w-full h-40 object-cover rounded-xl mb-3"
+                  className="w-full h-40 object-cover"
                 />
               )}
 
@@ -129,9 +178,9 @@ export default function AIPage() {
       )}
 
       {/* EMPTY STATE */}
-      {!loading && results.length === 0 && (
+      {!loading && results.length === 0 && ingredients.length > 0 && (
         <p className="text-center text-lime-200 pb-20">
-          ลองใส่วัตถุดิบเพื่อให้ AI แนะนำเมนู 👨‍🍳
+          ไม่พบเมนูที่เหมาะกับวัตถุดิบนี้ 😢
         </p>
       )}
     </div>

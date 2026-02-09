@@ -1,5 +1,5 @@
 export type AIAnalyzeResult = {
-  recipeId: number;
+  recipeId: string;
   recipeName: string;
   matchScore: number;
   missingIngredients: string[];

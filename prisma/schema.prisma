@@ -57,3 +57,10 @@ model recipes {
   recipe_ingredients recipe_ingredients[]
   recipe_steps       recipe_steps[]
 }
+
+model ai_cache {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ingredients_key String   @unique
+  result_json     Json
+  created_at      DateTime @default(now())
+}
