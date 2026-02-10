@@ -13,7 +13,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-better-sqlite3": "^7.3.0",
     "@prisma/adapter-pg": "^7.3.0",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^6.19.2",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
@@ -49,7 +49,6 @@
     "postcss": "^8.5.6",
     "prettier": "^3.8.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "prisma": "^7.3.0",
     "prisma-markdown": "^4.0.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5"

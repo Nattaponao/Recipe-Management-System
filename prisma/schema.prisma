@@ -4,17 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
-
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  authorId  Int
-  author    User    @relation(fields: [authorId], references: [id])
-}
-
 
 model User {
   id              Int     @id @default(autoincrement())
@@ -24,7 +15,15 @@ model User {
   posts           Post[]
 }
 
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean @default(false)
 
+  authorId  Int
+  author    User    @relation(fields: [authorId], references: [id])
+}
 
 model Recipe {
   id          String   @id @default(uuid())
@@ -42,12 +41,12 @@ model Recipe {
 }
 
 model RecipeIngredient {
-  id        String @id @default(uuid())
-  recipeId  String @map("recipe_id")
+  id        String  @id @default(uuid())
+  recipeId  String  @map("recipe_id")
   name      String
   amount    Float?
   unit      String?
-  sortOrder Int? @map("sort_order")
+  sortOrder Int?    @map("sort_order")
 
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
