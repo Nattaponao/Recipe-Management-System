@@ -20,20 +20,19 @@ model Post {
   title     String
   content   String?
   published Boolean @default(false)
-
   authorId  Int
   author    User    @relation(fields: [authorId], references: [id])
 }
 
 model Recipe {
-  id          String   @id @default(uuid())
-  name        String
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  name        String?            @default("")
   description String?
-  coverImage  String?  @map("cover_image")
-  category    String
-  country     String
-  createdAt   DateTime @default(now()) @map("created_at")
-
+  coverImage  String?            @map("cover_image")
+  category    String?
+  country     String?
+  tags        String?
   ingredients RecipeIngredient[]
   steps       RecipeStep[]
 
@@ -41,25 +40,30 @@ model Recipe {
 }
 
 model RecipeIngredient {
-  id        String  @id @default(uuid())
-  recipeId  String  @map("recipe_id")
-  name      String
-  amount    Float?
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipeId  String?  @default(dbgenerated("gen_random_uuid()")) @map("recipe_id") @db.Uuid
+  name      String?
+  amount    Decimal? @db.Decimal
   unit      String?
-  sortOrder Int?    @map("sort_order")
-
-  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  sortOrder BigInt?  @map("sort_order")
+  recipe    Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("recipe_ingredients")
 }
 
 model RecipeStep {
-  id       String @id @default(uuid())
-  recipeId String @map("recipe_id")
-  stepNo   Int    @map("step_no")
-  text     String
-
-  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipeId String? @default(dbgenerated("gen_random_uuid()")) @map("recipe_id") @db.Uuid
+  stepNo   BigInt? @map("step_no")
+  text     String?
+  recipe   Recipe? @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("recipe_steps")
+}
+
+model ai_cache {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ingredients_key String   @unique
+  result_json     Json
+  created_at      DateTime @default(now())
 }
