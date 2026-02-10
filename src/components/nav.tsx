@@ -16,7 +16,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <ul className="hidden md:flex font-semibold items-center">
               <li className="ml-12 text-[24px] "><Link href="/" className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-white after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100">Home</Link></li>
-              <li className="ml-12 text-[24px]"><Link href="/Recipes" className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-white after:scale-x-0  after:origin-center  after:transition-transform after:duration-300 hover:after:scale-x-100">Recipes</Link></li>
+              <li className="ml-12 text-[24px]"><Link href="/recipes" className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-white after:scale-x-0  after:origin-center  after:transition-transform after:duration-300 hover:after:scale-x-100">Recipes</Link></li>
               <li className="ml-12 text-[24px]"><Link href="/" className="relative inline-block cursor-pointer  after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-white after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100">Ai</Link></li>
               <li className="ml-12 text-[24px]"><Link href="/" className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-white after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100">Contect</Link></li>  
           </ul>
@@ -47,7 +47,7 @@ export default function Navbar() {
               <Link href="/" onClick={() => setOpen(false)}>Home</Link>
             </li>
             <li className="text-[18px]">
-              <Link href="/" onClick={() => setOpen(false)}>Recipes</Link>
+              <Link href="/recipes" onClick={() => setOpen(false)}>Recipes</Link>
             </li>
             <li className="text-[18px]">
               <Link href="/" onClick={() => setOpen(false)}>Ai</Link>

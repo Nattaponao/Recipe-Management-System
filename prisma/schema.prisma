@@ -15,12 +15,6 @@ model Post {
   author    User    @relation(fields: [authorId], references: [id])
 }
 
-model Recipe {
-  id           Int      @id @default(autoincrement())
-  name         String
-  instructions String
-  createdAt    DateTime @default(now())
-}
 
 model User {
   id              Int     @id @default(autoincrement())
@@ -28,4 +22,45 @@ model User {
   name            String?
   password_hashed String?
   posts           Post[]
+}
+
+
+
+model Recipe {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  coverImage  String?  @map("cover_image")
+  category    String
+  country     String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  ingredients RecipeIngredient[]
+  steps       RecipeStep[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id        String @id @default(uuid())
+  recipeId  String @map("recipe_id")
+  name      String
+  amount    Float?
+  unit      String?
+  sortOrder Int? @map("sort_order")
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("recipe_ingredients")
+}
+
+model RecipeStep {
+  id       String @id @default(uuid())
+  recipeId String @map("recipe_id")
+  stepNo   Int    @map("step_no")
+  text     String
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("recipe_steps")
 }
