@@ -15,11 +15,11 @@ function RecipeOfWeek() {
 
   // 
   return (
-    <div className='bg-[#F9F7EB]'>
+    <div className='bg-[#F9F7EB] text-black'>
       <div className='container mx-auto'>
         <div className='grid grid-cols-2 py-20 gap-5'>
           <div className='bg-[#FEFEF6] p-5 rounded-2xl'>
-            <h1 className='text-[30px] font-semibold'>Recipe of Week</h1>
+            <h1 className='text-[30px] font-semibold '>Recipe of Week</h1>
             <div className='flex justify-center'>
               <div className=''>
                 <div className='my-7 group overflow-hidden '>
