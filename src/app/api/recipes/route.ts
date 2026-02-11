@@ -1,43 +1,29 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+// GET /api/recipes
+export async function GET() {
+  const recipes = await prisma.recipe.findMany({
+    orderBy: { createdAt: "desc" },
+  })
+  return NextResponse.json(recipes)
+}
 
-  const q = searchParams.get("q")?.trim() ?? "";
-  const category = searchParams.get("category") ?? "";
-  const country = searchParams.get("country") ?? "";
+// POST /api/recipes
+export async function POST(req: Request) {
+  const body = await req.json()
+  const { name, instructions } = body
 
-  try {
-    const recipes = await prisma.recipe.findMany({
-      where: {
-        ...(q && {
-          name: {
-            contains: q,
-            mode: "insensitive",
-          },
-        }),
-        ...(category && { category }),
-        ...(country && { country }),
-      },
-
-      orderBy: {
-        createdAt: "desc",
-      },
-
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        coverImage: true,
-        category: true,
-        country: true,
-      },
-    });
-
-    return NextResponse.json(recipes);
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json([], { status: 500 });
+  if (!name || !instructions) {
+    return NextResponse.json(
+      { error: "name and instructions are required" },
+      { status: 400 }
+    )
   }
+
+  const recipe = await prisma.recipe.create({
+    data: { name, instructions },
+  })
+
+  return NextResponse.json(recipe, { status: 201 })
 }
