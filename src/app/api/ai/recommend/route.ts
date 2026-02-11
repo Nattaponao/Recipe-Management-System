@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
       (a, b) => b.matchScore - a.matchScore,
     );
 
-    if (scored.length > 0 && scored[0].matchScore >= 30) {
-      console.log('⚡ use DB scoring (skip AI)');
+    if (scored.length > 0 && scored[0].matchScore >= 10) {
+      console.log('⚡ smart DB fallback (no AI needed)');
       return NextResponse.json(scored.slice(0, 5));
     }
 
@@ -64,15 +64,13 @@ export async function POST(req: NextRequest) {
 
     try {
       analyzed = await analyzeRecipes(topRecipes, ingredients);
-    } catch (e) {
-      console.warn('⚠️ AI unavailable → fallback to DB scoring');
-
+    } catch {
       analyzed = scored.slice(0, 5).map((r) => ({
         recipeId: r.recipeId,
         recipeName: r.recipeName ?? 'ไม่ทราบชื่อเมนู',
         matchScore: r.matchScore,
         missingIngredients: r.missingIngredients,
-        reason: 'แนะนำจากฐานข้อมูล (AI ไม่พร้อมใช้งาน)',
+        reason: r.reason ?? 'แนะนำจากฐานข้อมูลอัจฉริยะ',
       }));
     }
 
@@ -86,7 +84,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(analyzed);
   } catch (error) {
     console.error('AI recommend error:', error);
-
     return NextResponse.json(
       { error: 'Failed to analyze recipes' },
       { status: 500 },
