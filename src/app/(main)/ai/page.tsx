@@ -19,7 +19,7 @@ export default function AIPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ➕ เพิ่ม ingredient ด้วย Enter
+  // เพิ่ม ingredient ด้วย Enter
   const addIngredient = () => {
     const value = input.trim();
     if (!value) return;
@@ -30,7 +30,7 @@ export default function AIPage() {
     setInput('');
   };
 
-  // ⌨️ กด Enter
+  //  กด Enter
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -38,12 +38,12 @@ export default function AIPage() {
     }
   };
 
-  // ❌ ลบ ingredient
+  // ลบ ingredient
   const removeIngredient = (name: string) => {
     setIngredients((prev) => prev.filter((i) => i !== name));
   };
 
-  // 🔍 ค้นหา AI
+  // ค้นหา AI
   const handleSearch = async () => {
     if (ingredients.length === 0) return;
 
@@ -72,7 +72,7 @@ export default function AIPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-lime-800 to-lime-700 text-white">
+    <div className="min-h-screen bg-[#637402] text-white">
       {/* HERO */}
       <section className="text-center pt-24 pb-12 px-4">
         <h1 className="text-6xl md:text-7xl font-extrabold text-yellow-400">
