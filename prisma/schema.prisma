@@ -24,38 +24,41 @@ model Post {
   author    User    @relation(fields: [authorId], references: [id])
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model recipe_ingredients {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  recipe_id  String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String?
-  amount     Decimal? @db.Decimal
-  unit       String?
-  sort_order BigInt?
-  recipes    recipes? @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+model Recipe {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  name        String?            @default("")
+  description String?
+  coverImage  String?            @map("cover_image")
+  category    String?
+  country     String?
+  tags        String?
+  ingredients RecipeIngredient[]
+  steps       RecipeStep[]
+
+  @@map("recipes")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model recipe_steps {
+model RecipeIngredient {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  recipe_id String?  @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  step_no   BigInt?
-  text      String?
-  recipes   recipes? @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+  recipeId  String?  @default(dbgenerated("gen_random_uuid()")) @map("recipe_id") @db.Uuid
+  name      String?
+  amount    Decimal? @db.Decimal
+  unit      String?
+  sortOrder BigInt?  @map("sort_order")
+  recipe    Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("recipe_ingredients")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model recipes {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at         DateTime             @default(now()) @db.Timestamptz(6)
-  name               String?              @default("")
-  description        String?
-  cover_image        String?
-  category           String?
-  country            String?
-  tags               String?
-  recipe_ingredients recipe_ingredients[]
-  recipe_steps       recipe_steps[]
+model RecipeStep {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipeId String? @default(dbgenerated("gen_random_uuid()")) @map("recipe_id") @db.Uuid
+  stepNo   BigInt? @map("step_no")
+  text     String?
+  recipe   Recipe? @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("recipe_steps")
 }
 
 model ai_cache {

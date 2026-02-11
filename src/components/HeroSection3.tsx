@@ -9,7 +9,7 @@ function HeroSection() {
             <h1 className='text-[36px]'>IN MY</h1>
             <div className='flex items-center gap-7'>
               <h1 className='text-[106px] font-semibold '>KITCHEN</h1>
-              <hr className='w-full' />
+              <hr className='w-full border bg-[#637402]' />
             </div>
           </div>
           <div className='grid grid-cols-6 mt-16 place-items-center mb-16 text-[#101010]'>
@@ -44,8 +44,8 @@ function HeroSection() {
             </div>
 
             <div className='flex items-center mt-2 gap-7'>    
-              <hr className='w-full'/>
-              <h1 className='text-[106px] font-semibold '>Popular</h1>     
+              <hr className='w-full border bg-[#637402]'/>
+              <h1 className='text-[106px] font-semibold border-[#637402]'>Popular</h1>     
             </div> 
             <div className='grid grid-cols-5  mt-10 place-items-center cards-focus '>
               <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
