@@ -1,5 +1,6 @@
 import Nav from '@/components/nav';
 import Footer from '@/components/footer';
+import NavbarServer from '@/components/NavbarServer';
 
 export default function MainLayout({
   children,
@@ -8,7 +9,7 @@ export default function MainLayout({
 }) {
   return (
     <>
-      <Nav />
+      <NavbarServer />
       {children}
       <Footer />
     </>

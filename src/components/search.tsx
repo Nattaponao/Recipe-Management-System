@@ -77,7 +77,7 @@ export default function SearchRecipeClient({
 
         <hr className="border-0 h-px bg-[#637402] mt-5" />
 
-        <div className="flex justify-between mt-3">
+        <div className="flex justify-between mt-3 text-black">
           <p className="text-[24px] font-semibold">Filter articles</p>
           <p className="text-[24px] font-semibold">{itemsText}</p>
         </div>
@@ -103,7 +103,7 @@ export default function SearchRecipeClient({
             </i>
           </div>
 
-          <div className="flex items-center relative w-90">
+          <div className="flex items-center relative w-90 ">
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
@@ -154,8 +154,8 @@ export default function SearchRecipeClient({
               <div className="grid grid-cols-4 gap-4 mt-4 pb-10">
                 {safeRecipes.map((r) => (
                   <Link key={r.id} href={`/recipes/${r.id}`}>
-                    <div className="rounded-xl bg-[#FEFEF6] w-70 overflow-hidden group flex flex-col h-full">
-                      <div className="py-4">
+                    <div className="text-black rounded-xl bg-[#FEFEF6] w-70 overflow-hidden group flex flex-col h-full">
+                      <div className="py-4 ">
                         <h2 className="pl-2 font-semibold">{r.name}</h2>
                       </div>
 

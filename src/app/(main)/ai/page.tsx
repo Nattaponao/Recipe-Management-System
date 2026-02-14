@@ -57,7 +57,11 @@ export default function AIPage() {
         body: JSON.stringify({ ingredients }),
       });
 
-      if (!res.ok) throw new Error('Request failed');
+      if (!res.ok) {
+        const text = await res.text(); // อ่าน error body
+        throw new Error(`Request failed: ${res.status} ${res.statusText} - ${text}`);
+      }
+
 
       const data: AIResult[] = await res.json();
 
@@ -72,7 +76,7 @@ export default function AIPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-lime-800 to-lime-700 text-white">
+    <div className="min-h-screen bg-[#637402] text-white">
       {/* HERO */}
       <section className="text-center pt-24 pb-12 px-4">
         <h1 className="text-6xl md:text-7xl font-extrabold text-yellow-400">

@@ -29,21 +29,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(cached.result_json as AIAnalyzeResult[]);
     }
 
-    const recipes = await prisma.recipes.findMany({
+    const recipes = await prisma.recipe.findMany({
       include: {
-        recipe_ingredients: true,
-        recipe_steps: true,
-      },
+      ingredients: true,
+      steps: true,
+},
       take: 50,
     });
 
+
+
     const lite = recipes.map((r) => ({
       id: r.id,
-      name: r.name ?? '',
-      ingredients: r.recipe_ingredients
+      name: r.name ?? "",
+      ingredients: (r.ingredients ?? [])
         .map((i) => i.name)
         .filter(Boolean) as string[],
     }));
+
 
     const scored = scoreRecipesByIngredients(lite, ingredients).sort(
       (a, b) => b.matchScore - a.matchScore,

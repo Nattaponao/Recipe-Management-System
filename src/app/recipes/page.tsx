@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 
 import SearchNoSSR from "@/components/SearchNoSSR";
 import Footer from '@/components/footer';
+import NavbarV2Server from '@/components/NavbarV2Server';
 
 export default async function RecipesPage() {
   const recipes = await prisma.recipe.findMany({
@@ -12,7 +13,7 @@ export default async function RecipesPage() {
 
   return (
     <div className={fredoka.className}>
-      <Navbar />
+      <NavbarV2Server />
       <SearchNoSSR initialRecipes={recipes ?? []} />
       <Footer/>
     </div>
