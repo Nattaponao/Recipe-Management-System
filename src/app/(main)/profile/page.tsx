@@ -1,27 +1,28 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileStats from '@/components/profile/ProfileStats';
 import ProfileActions from '@/components/profile/ProfileActions';
-import ProfileRecipeCard from '@/components/profile/ProfileRecipeCard';
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return <div className="p-10">Please login</div>;
+  }
+
   return (
     <section className="max-w-4xl mx-auto px-4 py-10">
-      <ProfileHeader name="Wavi" username="@Wavi" avatar="/profilemen.jpg" />
+      <ProfileHeader
+        name={session.user?.name ?? 'User'}
+        username={session.user?.email ?? ''}
+        avatar="/profilemen.jpg"
+      />
 
-      <ProfileStats followers={10} following={0} likes={5} />
+      <ProfileStats followers={0} following={0} likes={0} />
 
       <ProfileActions />
-
-      <div className="mt-10">
-        <ProfileRecipeCard
-          title="Shrimp Fried Rice"
-          image="/demofood.jpg"
-          category="Rice"
-          author="Wavi"
-          date="March 20, 2022"
-          avatar="/profilemen.jpg"
-        />
-      </div>
     </section>
   );
 }
