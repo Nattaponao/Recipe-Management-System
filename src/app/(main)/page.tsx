@@ -1,15 +1,17 @@
 
-import HeroSection3 from '@/components/HeroSection3';
+
+import HeroSection3Server from "@/components/HeroSection3Server";
 import HeroServer from '@/components/HeroServer';
-import RecipeOfWeek from '@/components/RecipeOfWeek';
+import RecipeOfWeekServer from "@/components/RecipeOfWeekServer";
+
 import { fredoka } from '@/lib/fonts';
 
 export default function Home() {
   return (
     <div className={`${fredoka.className}`}>
       <HeroServer />
-      <RecipeOfWeek />
-      <HeroSection3 />
+      <RecipeOfWeekServer />
+      <HeroSection3Server />
     </div>
   );
 }

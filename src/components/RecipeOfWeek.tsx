@@ -104,7 +104,8 @@ function Modal({
   );
 }
 
-export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) {
+export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean }) {
+
   const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
 
   function handleToggle(id: string) {
@@ -203,7 +204,18 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
 
 
   if (loadingSlots || !slots) {
-    return <div className="bg-[#F9F7EB] text-black p-10">Loading...</div>;
+    return <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <img
+          src="/loading.gif"
+          alt="loading"
+          className="w-32 h-32"
+        />
+        <p className="text-[#637402] font-semibold">
+          กำลังโหลดนะ...
+        </p>
+      </div>
+    </div>
   }
 
   const left = slots[1].recipe;
@@ -228,7 +240,7 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
 
     return (
       <div className="flex items-center gap-4">
-        <div className="rounded-full overflow-hidden flex items-center justify-center bg-[#637402] w-13 h-13">
+        <div className="rounded-full overflow-hidden flex items-center justify-center bg-[#637402]">
           {avatar ? (
             <img src={avatar} alt="person" className="w-full h-full object-cover" />
           ) : (
@@ -258,7 +270,7 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
   );
 
   const RightCard = ({ slot, recipe }: { slot: 2 | 3 | 4; recipe: RecipePick }) => (
-    <div className="flex bg-[#FEFEF6] px-4 rounded-xl relative">
+    <div className="flex w-full bg-[#FEFEF6] px-4 rounded-xl relative overflow-hidden min-w-0">
       {isAdmin && (
         <button
           type="button"
@@ -269,30 +281,32 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
         </button>
       )}
 
-      <div className="w-[550px] group overflow-hidden">
+      {/* รูป: ล็อกแค่ความกว้างรูป ไม่ดันทั้งการ์ด */}
+      <div className="shrink-0 w-[275px] group overflow-hidden ">
         <img
-          src={recipe.coverImage ?? '/nodata.png'}
-          alt={recipe.name ?? 'Recipe'}
-          className="object-cover h-full w-[275px] transition-transform duration-300 ease-out group-hover:scale-105"
+          src={recipe.coverImage ?? "/nodata.png"}
+          alt={recipe.name ?? "Recipe"}
+          className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
         />
       </div>
 
-      <div className="p-5 w-full">
-        <p className="font-semibold">{recipe.name ?? 'Untitled'}</p>
+      {/* เนื้อหา: ให้ยุบได้ */}
+      <div className="p-5 flex-1 min-w-0">
+        <p className="font-semibold line-clamp-2">{recipe.name ?? "Untitled"}</p>
 
         <div className="flex items-center justify-between mt-5">
           <p className="py-1.5 px-3 border rounded-3xl text-[14px] font-semibold">
-            {recipe.category ?? '-'}
+            {recipe.category ?? "-"}
           </p>
           <Heart id={recipe.id} />
         </div>
 
         <hr className="border border-[#DFD3A4] my-3.5" />
-
         <Profile slot={slot} recipe={recipe} />
       </div>
     </div>
   );
+
 
   return (
     <div className="bg-[#F9F7EB] text-black">
@@ -317,13 +331,17 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
 
             <div className="flex justify-center">
               <div>
-                <div className="my-7 group overflow-hidden ">
-                  <img
-                    src={left.coverImage ?? '/nodata.png'}
-                    alt={left.name ?? 'Recipe'}
-                    className="w-[520px] h-[500px] object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                  />
+                <div className="my-7 w-[520px] overflow-hidden ">
+                  <div className="relative w-full group overflow-hidden" style={{ aspectRatio: "5 / 4" }}>
+                    <img
+                      src={left.coverImage ?? "/nodata.png"}
+                      alt={left.name ?? "Recipe"}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                    />
+                  </div>
                 </div>
+
+
 
                 <div className="flex justify-between items-center">
                   <p className="text-[14px] font-semibold py-1 px-7 border rounded-3xl">
@@ -340,11 +358,12 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
           </div>
 
           {/* RIGHT */}
-          <div className="flex flex-col h-full justify-between gap-6">
+          <div className="grid grid-rows-3 gap-6 h-full">
             <RightCard slot={2} recipe={r1} />
             <RightCard slot={3} recipe={r2} />
             <RightCard slot={4} recipe={r3} />
           </div>
+
         </div>
       </div>
 
@@ -368,7 +387,18 @@ export default function RecipeOfWeek({ isAdmin = true }: { isAdmin?: boolean }) 
         </div>
 
         {loadingRecipes ? (
-          <div className="py-8 text-center text-gray-500 text-sm">กำลังโหลด...</div>
+          <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <img
+                src="/loading.gif"
+                alt="loading"
+                className="w-32 h-32"
+              />
+              <p className="text-[#637402] font-semibold">
+                กำลังโหลดนะ...
+              </p>
+            </div>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="py-8 text-center text-gray-500 text-sm">ไม่พบเมนู</div>
         ) : (

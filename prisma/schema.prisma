@@ -43,6 +43,7 @@ model Recipe {
   featured_cards featured_cards[]
   authorId Int?  @map("author_id")
   author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  popular_cards popular_cards[]
 
 
   @@map("recipes")
@@ -102,4 +103,16 @@ model featured_cards {
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
 
   @@map("featured_cards")
+}
+
+model popular_cards {
+  id        Int    @id @default(autoincrement())
+  slot      Int    @unique // 1..5
+  recipe_id String @db.Uuid
+
+  updated_at DateTime @updatedAt
+
+  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+
+  @@map("popular_cards")
 }

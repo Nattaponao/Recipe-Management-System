@@ -228,6 +228,7 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
           >
             {/* ถ้าเป็น data url ใช้ img เพื่อไม่ต้องตั้ง next.config */}
             {rightSrc.startsWith("data:") ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={rightSrc}
                 alt="kapao"
