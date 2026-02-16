@@ -18,35 +18,39 @@ export default function ProfileRecipeCard({
   avatar,
 }: Props) {
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden max-w-md">
-      <Image
-        src={image}
-        alt={title}
-        width={400}
-        height={250}
-        className="w-full h-48 object-cover"
-      />
+    <div className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-50">
+      {/* ส่วนรูปภาพอาหาร */}
+      <div className="relative h-48 w-full">
+        <Image
+          src={image || '/GreenCurry.png'} //
+          alt={title}
+          fill
+          className="object-cover"
+        />
+        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#637402]">
+          {category || 'ทั่วไป'}
+        </div>
+      </div>
 
-      <div className="p-4 space-y-2">
-        <h3 className="text-lg font-semibold">{title}</h3>
+      {/* ส่วนรายละเอียดข้อมูล */}
+      <div className="p-5 space-y-3">
+        <h3 className="text-xl font-bold text-[#637402] line-clamp-1">
+          {title || 'ชื่อสูตรอาหาร'}
+        </h3>
 
-        <span className="text-xs border px-2 py-1 rounded-full">
-          {category}
-        </span>
-
-        <div className="flex items-center justify-between pt-2 text-sm text-gray-500">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
           <div className="flex items-center gap-2">
-            <Image
-              src={avatar}
-              alt="author"
-              width={20}
-              height={20}
-              className="rounded-full"
-            />
-            <span>{author}</span>
+            <div className="relative w-6 h-6">
+              <Image
+                src={avatar || '/profilemen.jpg'}
+                alt="author"
+                fill
+                className="rounded-full object-cover"
+              />
+            </div>
+            <span className="text-sm text-gray-600 font-medium">{author}</span>
           </div>
-
-          <span>{date}</span>
+          <span className="text-xs text-gray-400">{date}</span>
         </div>
       </div>
     </div>
