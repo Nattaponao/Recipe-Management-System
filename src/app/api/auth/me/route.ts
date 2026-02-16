@@ -8,24 +8,18 @@ export async function GET() {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
-    if (!token) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    if (!token) return NextResponse.json({ user: null }, { status: 200 });
 
-    const secret = process.env.JWT_SECRET!;
-    const decoded = jwt.verify(token, secret) as { sub: number; email: string };
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as unknown as {
+      sub: number;
+    };
     const user = await prisma.user.findUnique({
       where: { id: decoded.sub },
       select: { id: true, name: true, email: true },
     });
 
-    if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 401 });
-    }
-
-    return NextResponse.json({ user });
-  } catch (err) {
-    return NextResponse.json({ message: 'Invalid token' }, { status: 401 });
+    return NextResponse.json({ user }, { status: 200 });
+  } catch {
+    return NextResponse.json({ user: null }, { status: 200 });
   }
 }
