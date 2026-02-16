@@ -6,6 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+
+
 type RecipeCard = {
   id: string;
   name: string;
@@ -17,9 +19,12 @@ type RecipeCard = {
 
 export default function SearchRecipeClient({
   initialRecipes,
+  isAdmin = false,
 }: {
   initialRecipes: RecipeCard[];
+  isAdmin?: boolean;
 }) {
+
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [country, setCountry] = useState("");
@@ -31,6 +36,7 @@ export default function SearchRecipeClient({
   const [loading, setLoading] = useState(false);
   const safeRecipes = Array.isArray(recipes) ? recipes : [];
   const itemsText = useMemo(() => `${(recipes?.length ?? 0)} items`, [recipes?.length]);
+
 
   useEffect(() => {
     if (!mounted) return;

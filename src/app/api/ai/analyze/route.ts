@@ -22,11 +22,9 @@ export async function POST(req: Request) {
     }
 
     const recipes = await prisma.recipe.findMany({
-      take: 159,
-      select: {
-        id: true,
-        name: true,
-        instructions: true,
+      include: {
+        ingredients: { select: { name: true } },
+        steps: { select: { text: true } },
       },
     });
 

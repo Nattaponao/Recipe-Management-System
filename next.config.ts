@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {

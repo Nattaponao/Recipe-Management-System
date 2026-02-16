@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { fredoka } from '@/lib/fonts';
+
 type NavItem = { label: string; href: string };
 
 export default function Navbar({ isAdmin = false }: { isAdmin?: boolean }) {
@@ -17,7 +19,7 @@ export default function Navbar({ isAdmin = false }: { isAdmin?: boolean }) {
 
   const adminMenu: NavItem[] = [
     { label: "Home", href: "/" },
-    { label: "Recipes", href: "/recipes" },
+    { label: "Recipes", href: "/admin/recipes"},
     { label: "Dashboard", href: "/admin" },
     { label: "Users", href: "/admin/users" },
   ];
@@ -25,7 +27,7 @@ export default function Navbar({ isAdmin = false }: { isAdmin?: boolean }) {
   const menu = isAdmin ? adminMenu : userMenu;
 
   return (
-    <div className="bg-[#637402]">
+    <div className={`bg-[#637402]  ${fredoka.className}`}>
       <nav className="container mx-auto">
         <div className="flex justify-between items-center py-4 text-white">
           <div className="font-semibold text-[32px] md:text-[48px]">

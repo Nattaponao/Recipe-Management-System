@@ -16,7 +16,7 @@ function formRegister() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
     setMessage('')
@@ -34,13 +34,24 @@ function formRegister() {
       setEmail('')
       setPassword('')
       setConfrimPassword('')
-      e.target.reset()
+      e.currentTarget.reset();
       router.push('/login')
-    } catch (err) {
-      setError(err?.res?.data?.message || err.message || 'Something went wrong')
-    } finally {
-      setLoading(false)
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong";
+
+      // ถ้าเป็น axios error มักมี response.data.message
+      const axiosMsg =
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        (err as any).response?.data?.message;
+
+      setError(axiosMsg || message);
     }
+
   }
 
   return (
@@ -80,13 +91,13 @@ function formRegister() {
           </form>
         </div>
         <div className="hidden md:flex col-span-2 items-start justify-end pr-6">
-            <Image
-              src="/logo.svg"
-              alt="Logo"
-              width={580}
-              height={580}
-              className="w-145"
-            />
+          <Image
+            src="/logo.svg"
+            alt="Logo"
+            width={580}
+            height={580}
+            className="w-145"
+          />
         </div>
       </div>
     </div>

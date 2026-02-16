@@ -12,9 +12,9 @@ export async function GET() {
 // POST /api/recipes
 export async function POST(req: Request) {
   const body = await req.json()
-  const { name, instructions } = body
+  const { name, description } = body
 
-  if (!name || !instructions) {
+  if (!name || !description) {
     return NextResponse.json(
       { error: "name and instructions are required" },
       { status: 400 }
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   }
 
   const recipe = await prisma.recipe.create({
-    data: { name, instructions },
+    data: { name, description },
   })
 
   return NextResponse.json(recipe, { status: 201 })

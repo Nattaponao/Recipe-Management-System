@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     select: {
       id: true,
       name: true,
-      instructions: true,
+      description: true,
     },
   });
 
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const context = recipes.map((r) => ({
     id: r.id,
     name: r.name,
-    instructions: r.instructions,
+    instructions: r.description,
   }));
 
   // Prompt สำหรับ schema

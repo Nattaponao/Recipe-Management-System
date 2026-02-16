@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { deleteUserAction } from "@/app/admin/users/actions";
+import { deleteUserAction } from "@/app/(main)/admin/users/actions";
+
 
 export default function DeleteUserButton({ id }: { id: number }) {
   const [pending, startTransition] = useTransition();

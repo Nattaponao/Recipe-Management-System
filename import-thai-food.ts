@@ -18,7 +18,8 @@ async function main() {
     await prisma.recipe.create({
       data: {
         name: item.name,
-        instructions: item.text,
+        description: item.text,
+
       },
     });
     count++;

@@ -6,10 +6,12 @@ import { validateAIResult } from '@/ai/ai.validator';
 import { Prisma } from '@prisma/client';
 import type { GenerativeModel } from '@google/generative-ai';
 
-type RecipeWithRelations = Prisma.recipesGetPayload<{
-  include: {
-    recipe_ingredients: true;
-    recipe_steps: true;
+type RecipeForAnalyze = Prisma.RecipeGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    ingredients: { select: { name: true } };
+    steps: { select: { text: true } };
   };
 }>;
 
@@ -39,19 +41,18 @@ async function generateWithRetry(
 }
 
 export async function analyzeRecipes(
-  recipes: RecipeWithRelations[],
+  recipes: RecipeForAnalyze[],
   userIngredients: string[],
 ): Promise<AIAnalyzeResult[]> {
   const model = getAnalyzeModel();
 
   const formattedRecipes = recipes.map((r) => ({
     id: r.id,
-    name: r.name ?? '',
-
-    ingredients: r.recipe_ingredients.map((i) => i.name ?? '').filter(Boolean),
-
-    steps: r.recipe_steps.map((s) => s.text ?? '').filter(Boolean),
+    name: r.name ?? "",
+    ingredients: r.ingredients.map((i) => i.name ?? "").filter(Boolean),
+    steps: r.steps.map((s) => s.text ?? "").filter(Boolean),
   }));
+
 
   const prompt = buildAnalyzePrompt(formattedRecipes, userIngredients);
 
