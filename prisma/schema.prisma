@@ -5,7 +5,9 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
 
 model User {
   id              Int            @id @default(autoincrement())
@@ -15,8 +17,10 @@ model User {
   role            String         @default("USER")
   posts           Post[]
   recipe_likes    recipe_likes[]
-  recipes Recipe[]
+  recipes         Recipe[]
+  lastSeen DateTime? @db.Timestamptz(6)
 
+  
 }
 
 model Post {
@@ -37,13 +41,14 @@ model Recipe {
   category       String?
   country        String?
   tags           String?
+  authorId       Int?               @map("author_id")
+  featured_cards featured_cards[]
   ingredients    RecipeIngredient[]
   recipe_likes   recipe_likes[]
   steps          RecipeStep[]
-  featured_cards featured_cards[]
-  authorId Int?  @map("author_id")
-  author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author         User?              @relation(fields: [authorId], references: [id])
   popular_cards popular_cards[]
+
 
 
   @@map("recipes")
@@ -90,26 +95,22 @@ model recipe_likes {
 }
 
 model featured_cards {
-  id        Int    @id @default(autoincrement())
-  slot      Int    @unique // 1..4
-  recipe_id String @db.Uuid
-
+  id             Int      @id @default(autoincrement())
+  slot           Int      @unique
+  recipe_id      String   @db.Uuid
   profile_name   String?
   profile_date   String?
   profile_avatar String?
-
-  updated_at DateTime @updatedAt
-
-  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+  updated_at     DateTime @updatedAt
+  recipe         Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
 
   @@map("featured_cards")
 }
 
 model popular_cards {
-  id        Int    @id @default(autoincrement())
-  slot      Int    @unique // 1..5
-  recipe_id String @db.Uuid
-
+  id         Int      @id @default(autoincrement())
+  slot       Int      @unique // 1..5
+  recipe_id  String   @db.Uuid
   updated_at DateTime @updatedAt
 
   recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade)

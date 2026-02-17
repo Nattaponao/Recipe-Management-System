@@ -204,13 +204,7 @@ export default function ManageRecipesClient({ initialRecipes }: { initialRecipes
                       >
                         Delete
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setOpenMenuId(null)}
-                        className="w-full text-left px-4 py-2 hover:bg-[#DFD3A4]/30 text-[#637402]/80"
-                      >
-                        Close
-                      </button>
+                     
                     </div>
                   )}
                 </div>

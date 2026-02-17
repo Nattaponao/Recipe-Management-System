@@ -1,14 +1,11 @@
-import Nav from '@/components/nav';
-import Footer from '@/components/footer';
-import NavbarServer from '@/components/NavbarServer';
+import Footer from "@/components/footer";
+import NavbarServer from "@/components/NavbarServer";
+import OnlinePing from "@/components/OnlinePing";
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <OnlinePing />
       <NavbarServer />
       {children}
       <Footer />
