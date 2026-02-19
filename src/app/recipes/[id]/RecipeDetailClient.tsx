@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 
 
 type Step = { id: string; stepNo: number; text: string };
@@ -25,9 +26,35 @@ type Recipe = {
 
 };
 
-export default function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
+export default function RecipeDetailClient({
+  recipe,
+  isAdmin = false,
+}: {
+  recipe: Recipe;
+  isAdmin?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [draftName, setDraftName] = useState(recipe.name ?? "");
+  const [draftDesc, setDraftDesc] = useState(recipe.description ?? "");
+  const [draftCover, setDraftCover] = useState(recipe.coverImage ?? "");
+
+
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likeLoading, setLikeLoading] = useState(false);
+
   const [foverited, setFoverited] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const r = await fetch(`/api/recipes/${recipe.id}/like`, { cache: "no-store" });
+      if (!r.ok) return;
+      const data = await r.json();
+      setLiked(Boolean(data.liked));
+      setLikeCount(Number(data.count ?? 0));
+    })();
+  }, [recipe.id]);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -50,6 +77,133 @@ export default function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
   return (
     <div className="bg-[#F9F7EB] {fredoka.className}">
       <div className="w-full h-180 overflow-hidden relative">
+        {isAdmin && (
+          <div className="absolute top-5 right-5 z-20">
+            <div className="bg-white/95 border border-[#637402]/20 shadow-sm rounded-2xl p-4 w-[320px]">
+              <div className="flex items-center justify-between">
+                <div className="text-[#637402] font-semibold">Admin</div>
+                <button
+                  type="button"
+                  onClick={() => setEditing((v) => !v)}
+                  className="text-sm px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30"
+                >
+                  {editing ? "Close" : "Edit"}
+                </button>
+              </div>
+
+              {/* Edit panel */}
+              {editing && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <label className="text-xs text-[#637402]/70 font-semibold">Name</label>
+                    <input
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      className="mt-1 w-full border border-[#637402]/25 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#637402]"
+                      placeholder="Recipe name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-[#637402]/70 font-semibold">Description</label>
+                    <textarea
+                      value={draftDesc}
+                      onChange={(e) => setDraftDesc(e.target.value)}
+                      className="mt-1 w-full border border-[#637402]/25 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#637402] min-h-[90px]"
+                      placeholder="Recipe description"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-[#637402]/70 font-semibold">Cover Image URL</label>
+                    <input
+                      value={draftCover}
+                      onChange={(e) => setDraftCover(e.target.value)}
+                      className="mt-1 w-full border border-[#637402]/25 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#637402]"
+                      placeholder="https://... หรือ /kapao.jpeg"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={async () => {
+                        try {
+                          setSaving(true);
+                          const r = await fetch(`/api/admin/recipes/${recipe.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              name: draftName,
+                              description: draftDesc,
+                              coverImage: draftCover || null,
+                            }),
+                          });
+                          const data = await r.json().catch(() => ({}));
+                          if (!r.ok) {
+                            alert(data?.message ?? "Update failed");
+                            return;
+                          }
+                          alert("Updated!");
+                          window.location.reload(); // ง่ายสุดให้ข้อมูลรีเฟรชตรง prisma
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                      className="flex-1 bg-[#637402] text-white rounded-xl py-2 text-sm hover:opacity-90 disabled:opacity-50"
+                    >
+                      {saving ? "Saving..." : "Save"}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => {
+                        setDraftName(recipe.name ?? "");
+                        setDraftDesc(recipe.description ?? "");
+                        setDraftCover(recipe.coverImage ?? "");
+                        setEditing(false);
+                      }}
+                      className="flex-1 border border-[#637402]/25 text-[#637402] rounded-xl py-2 text-sm hover:bg-[#DFD3A4]/25 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={async () => {
+                      const ok = confirm("ลบสูตรนี้จริงไหม? (ย้อนกลับไม่ได้)");
+                      if (!ok) return;
+
+                      setSaving(true);
+                      try {
+                        const r = await fetch(`/api/admin/recipes/${recipe.id}`, {
+                          method: "DELETE",
+                        });
+                        const data = await r.json().catch(() => ({}));
+                        if (!r.ok) {
+                          alert(data?.message ?? "Delete failed");
+                          return;
+                        }
+                        alert("Deleted");
+                        window.location.href = "/recipes";
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    className="w-full mt-2 border border-red-600 text-red-600 rounded-xl py-2 text-sm hover:bg-red-50 disabled:opacity-50"
+                  >
+                    Delete recipe
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={recipe.coverImage ?? "/nodata.png"}
@@ -63,26 +217,81 @@ export default function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
             <p className="text-white text-[18px]">by Wavi</p>
             <button
               type="button"
-              className="mt-3 cursor-pointer"
-              onClick={() => setLiked((v) => !v)}
+              className={`mt-3 cursor-pointer transition-transform ${likeLoading ? "opacity-60 scale-95" : "hover:scale-105"}`}
+              disabled={likeLoading}
+              onClick={async () => {
+                if (likeLoading) return;
+
+                // --- optimistic update ---
+                const prevLiked = liked;
+                const prevCount = likeCount;
+
+                const nextLiked = !prevLiked;
+                const nextCount = Math.max(0, prevCount + (nextLiked ? 1 : -1));
+
+                setLiked(nextLiked);
+                setLikeCount(nextCount);
+
+                try {
+                  setLikeLoading(true);
+
+                  const r = await fetch(`/api/recipes/${recipe.id}/like`, { method: "POST" });
+
+                  const ct = r.headers.get("content-type") || "";
+                  if (!ct.includes("application/json")) {
+                    // rollback
+                    setLiked(prevLiked);
+                    setLikeCount(prevCount);
+                    return;
+                  }
+
+                  const data = await r.json();
+
+                  if (!r.ok) {
+                    // rollback
+                    setLiked(prevLiked);
+                    setLikeCount(prevCount);
+                    alert(data?.message ?? "Please login");
+                    return;
+                  }
+
+                  // sync ให้ตรง server (กันคลาดเคลื่อน)
+                  setLiked(Boolean(data.liked));
+                  setLikeCount(Number(data.count ?? nextCount));
+                } catch (e) {
+                  // rollback
+                  setLiked(prevLiked);
+                  setLikeCount(prevCount);
+                  console.error("Like error:", e);
+                } finally {
+                  setLikeLoading(false);
+                }
+              }}
+
               aria-label="like"
             >
               {!liked ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24">
-                  <path fill="#fff" d="m12.1 18.55l-.1.1l-.11-.1C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5c1.54 0 3.04 1 3.57 2.36h1.86C13.46 6 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5c0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.41 2 8.5c0 3.77 3.4 6.86 8.55 11.53L12 21.35l1.45-1.32C18.6 15.36 22 12.27 22 8.5C22 5.41 19.58 3 16.5 3" />
+                  <path
+                    fill="#fff"
+                    d="m12.1 18.55l-.1.1l-.11-.1C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5c1.54 0 3.04 1 3.57 2.36h1.86C13.46 6 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5c0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.41 2 8.5c0 3.77 3.4 6.86 8.55 11.53L12 21.35l1.45-1.32C18.6 15.36 22 12.27 22 8.5C22 5.41 19.58 3 16.5 3"
+                  />
                 </svg>
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24">
-                  <path fill="#db0101" d="m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z" />
+                  <path
+                    fill="#db0101"
+                    d="m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z"
+                  />
                 </svg>
               )}
             </button>
 
+
           </div>
           <div className="text-[18px] text-white mt-1 flex justify-between items-center">
             <p >ถูกใจทั้งหมด</p>
-            <p>999</p>
-            
+            <p className="mr-3">{likeCount}</p>
           </div>
 
         </div>
@@ -122,73 +331,82 @@ export default function RecipeDetailClient({ recipe }: { recipe: Recipe }) {
         </div>
 
         <div className="container mx-auto mt-28">
-          <div className="flex items-center mt-10 mb-4 gap-30">
-            <hr className="w-full border-0 h-px bg-[#637402]"/>
-            <h2 className="text-[105px] font-semibold  text-[#637402]">INGREDIENTS</h2>
-          </div>
-          <div className="">
-            {recipe.ingredients?.length === 0 ? (
-              <p className="text-gray-500 mt-4">ยังไม่มีวัตถุดิบ</p>
-            ) : (
-              <div className="flex justify-around">
-                <ul className="ml-72 space-y-2 bg-[#FEFEF6] py-7 px-4 text-[18px] w-80 rounded-2xl">
-                  {recipe.ingredients
-                    ?.slice()
-                    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-                    .map((ing) => (
-                      <li key={ing.id} className="">
-                        <span>{ing.name}</span>
-                        <span className="text-gray-700 font-semibold pl-3">
-                          {ing.amount ?? ""}  {ing.unit ?? ""}
-                        </span>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-          </div>
-          <div>
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-[1fr_500px] gap-16 items-start">
 
-            <h2 className="text-[105px] font-semibold mt-10 mb-4 text-[#637402]">PREPARATION</h2>
-            <div className="flex items-center justify-between pb-32">
+              {/* เส้นซ้าย */}
+              <div className="pt-14">
+                <hr className="w-full border-0 h-px bg-[#637402]/40" />
+              </div>
+
+              {/* คอลัมน์ขวา */}
               <div>
-                {recipe.steps.length === 0 ? (
-                  <p className="text-gray-500 mt-4">ยังไม่มีขั้นตอน</p>
+                <h2 className="text-[105px] font-semibold text-[#637402] leading-none">
+                  INGREDIENTS
+                </h2>
+
+                {recipe.ingredients?.length === 0 ? (
+                  <p className="text-gray-500 mt-6">ยังไม่มีวัตถุดิบ</p>
                 ) : (
-                  <ol className="space-y-4">
-                    {recipe.steps.map((s) => (
-                      <li key={s.id} className="mt-10 flex gap-5">
-                        <hr className="w-20 border-0 h-px bg-[#637402] mt-6"/>
-                        <div className="flex flex-col">
-                          <div className="text-[30px] font-semibold text-[#637402]" >
-                          Step {s.stepNo}
-                          </div>
-                          <div className="text-[22px] font-semibold mt-5">
-                            <p >{s.text}</p>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
+                  <ul className="mt-4 bg-[#FEFEF6] rounded-2xl px-8 py-6 text-[18px] shadow-sm">
+                    {recipe.ingredients
+                      ?.slice()
+                      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                      .map((ing) => (
+                        <li key={ing.id} className="leading-8 ">
+                          <span className="mr-4">{ing.name}</span>
+                          <span className="font-semibold">
+                            {ing.amount ?? ""} {ing.unit ?? ""}
+                          </span>{" "}
+
+                        </li>
+                      ))}
+                  </ul>
                 )}
               </div>
-              <div className="  h-[600px] flex items-center justify-center w-100 pr-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={recipe.coverImage ?? "/nodata.png"}
-                  alt={recipe.name}
-                  width={400}
-                  height={600}
-                  className="h-full object-cover"
-                />      
-              </div>
+
+            </div>
+          </div>
+
+          <h2 className="text-[105px] font-semibold mt-10 mb-4 text-[#637402]">PREPARATION</h2>
+          <div className="flex items-center justify-between pb-32">
+            <div>
+              {recipe.steps.length === 0 ? (
+                <p className="text-gray-500 mt-4">ยังไม่มีขั้นตอน</p>
+              ) : (
+                <ol className="space-y-4">
+                  {recipe.steps.map((s) => (
+                    <li key={s.id} className="mt-10 flex gap-5">
+                      <hr className="w-20 border-0 h-px bg-[#637402] mt-6" />
+                      <div className="flex flex-col">
+                        <div className="text-[30px] font-semibold text-[#637402]" >
+                          Step {s.stepNo}
+                        </div>
+                        <div className="text-[22px] font-semibold mt-5">
+                          <p >{s.text}</p>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+            <div className="  h-[600px] flex items-center justify-center w-100 pr-5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={recipe.coverImage ?? "/nodata.png"}
+                alt={recipe.name}
+                width={400}
+                height={600}
+                className="h-full object-cover"
+              />
             </div>
           </div>
         </div>
-
-
-
       </div>
+
+
+
     </div>
   );
 }

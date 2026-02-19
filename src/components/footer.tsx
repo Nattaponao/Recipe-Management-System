@@ -1,11 +1,44 @@
-import Link from "next/link"
-import { cookies } from "next/headers"
-import LogoutButton from "./LogoutButton"
+import Link from "next/link";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import LogoutButton from "./LogoutButton";
+import { isAdminEmail } from "@/lib/admin";
+
+type NavItem = { label: string; href: string };
 
 export default async function Footer() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("token")?.value
-  const isAuthed = Boolean(token)
+  const cookieStore = await cookies();
+  const token = cookieStore.getAll().find((c) => c.name === "token")?.value;
+
+  let isAuthed = false;
+  let isAdmin = false;
+
+  if (token) {
+    isAuthed = true;
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      isAdmin = isAdminEmail(payload?.email);
+    } catch {
+      isAuthed = false;
+      isAdmin = false;
+    }
+  }
+
+  const userMenu: NavItem[] = [
+    { label: "Home", href: "/" },
+    { label: "Recipes", href: "/recipes" },
+    { label: "Ai", href: "/ai" },
+    { label: "Contect", href: "/" },
+  ];
+
+  const adminMenu: NavItem[] = [
+    { label: "Home", href: "/" },
+    { label: "Recipes", href: "admin/recipes" },
+    { label: "Dashboard", href: "/admin" },
+    { label: "Users", href: "/admin/users" },
+  ];
+
+  const menu = isAdmin ? adminMenu : userMenu;
 
   return (
     <footer className="bg-[#E4D7AA] pt-9 pb-5">
@@ -16,19 +49,22 @@ export default async function Footer() {
               Khang Saeb
             </h1>
 
-            <hr />
+            <hr className="border-0 h-px bg-[#637402]" />
 
             <div className="text-[#637402] flex flex-col md:flex-row justify-between mt-6 gap-6 md:gap-0">
               <p>อาณาจักรแห่งความอร่อย</p>
 
+              {/* ✅ เมนูให้ตรงกับ NavbarV2 */}
               <ul className="font-semibold">
-                <li className="mb-1 hover:underline"><Link href="/">Home</Link></li>
-                <li className="mb-1 hover:underline"><Link href="#">Recipes</Link></li>
-                <li className="mb-1 hover:underline"><Link href="#">Tips</Link></li>
-                <li className="mb-1 hover:underline"><Link href="#">Contect</Link></li>
+                {menu.map((item) => (
+                  <li key={item.label} className="mb-1 hover:underline">
+                    <Link href={item.href}>{item.label}</Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
+
           <div className="flex bg-[#637402] w-full md:w-auto py-4 px-6 md:px-9 justify-center rounded-2xl">
             <div className="flex flex-col justify-center items-center text-center">
               <h1 className="text-[#DFD3A4] text-[18px] md:text-[20px] font-semibold">
@@ -47,9 +83,8 @@ export default async function Footer() {
               )}
             </div>
           </div>
-
         </div>
       </div>
     </footer>
-  )
+  );
 }

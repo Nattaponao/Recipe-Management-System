@@ -1,6 +1,9 @@
 import React from 'react'
-import Image from 'next/image'
-function HeroSection() {
+import { PopularBlock } from './PopularBlock'; 
+
+export default function HeroSection3({ isAdmin }: { isAdmin: boolean }) {
+  console.log("HeroSection3 isAdmin =", isAdmin, typeof isAdmin);
+
   return (
     <div className='bg-[#F9F7EB] pb-20'>
       <div className='container mx-auto'>
@@ -39,91 +42,9 @@ function HeroSection() {
             </div>
           </div>
           <div className=' text-[#637402]'>
-            <div className='flex relative'>
-               <h1 className='text-[36px] absolute right-85 font-semibold'>IN</h1>
-            </div>
+            
+           <PopularBlock isAdmin={Boolean(isAdmin)} />
 
-            <div className='flex items-center mt-2 gap-7'>    
-              <hr className='w-full border bg-[#637402]'/>
-              <h1 className='text-[106px] font-semibold border-[#637402]'>Popular</h1>     
-            </div> 
-            <div className='grid grid-cols-5  mt-10 place-items-center cards-focus '>
-              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
-                <div className='w-60'>
-                  <Image
-                    src='/GreenCurry.png'
-                    alt='Green curry'
-                    width={320}
-                    height={300}
-                    className='object-cover'
-                  />
-                </div>
-                <div className='font-semibold p-6 h-32' >
-                  <h1 className='text-black text-[18px] leading-5'>Green Curry</h1>
-                  <p className='text-[#B0B0B0] text-[14px] leading-5'>All green and fresh soup</p>
-                </div>
-              </div>
-             <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
-                <div className='w-60'>
-                  <Image
-                    src='/GreenCurry.png'
-                    alt='Green curry'
-                    width={320}
-                    height={300}
-                    className='object-cover'
-                  />
-                </div>
-                <div className='font-semibold p-6 h-32' >
-                  <h1 className='text-black text-[18px] leading-5'>Tom Yum Goong</h1>
-                  <p className='text-[#B0B0B0] text-[14px] leading-5'>Gluten free with potato crust!</p>
-                </div>
-              </div>
-              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
-                <div className='w-60'>
-                  <Image
-                    src='/GreenCurry.png'
-                    alt='Green curry'
-                    width={320}
-                    height={300}
-                    className='object-cover'
-                  />
-                </div>
-                <div className='font-semibold p-6 h-32' >
-                  <h1 className='text-black text-[18px] leading-5'>Pad Thai</h1>
-                  <p className='text-[#B0B0B0] text-[14px] leading-5'>Easy one-pot meal for dinners.</p>
-                </div>
-              </div>
-              <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
-                <div className='w-60'>
-                  <Image
-                    src='/GreenCurry.png'
-                    alt='Green curry'
-                    width={320}
-                    height={300}
-                    className='object-cover'
-                  />
-                </div>
-                <div className='font-semibold p-6 h-32' >
-                  <h1 className='text-black text-[18px] leading-5'>Red pork over rice</h1>
-                  <p className='text-[#B0B0B0] text-[14px] leading-5'>Fancy flavors and textures you need to try.</p>
-                </div>
-              </div>
-             <div className='bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card'>
-                <div className='w-60'>
-                  <Image
-                    src='/GreenCurry.png'
-                    alt='Green curry'
-                    width={320}
-                    height={300}
-                    className='object-cover'
-                  />
-                </div>
-                <div className='font-semibold p-6 h-32 ' >
-                  <h1 className='text-black text-[18px] leading-5'>Stir-fried Chicken with cashew nuts</h1>
-                  <p className='text-[#B0B0B0] text-[14px] leading-5'>Springy, light and yet comforting bowl of pasta.</p>
-                </div>
-              </div>
-            </div>     
           </div>
         </div>
       </div>
@@ -131,4 +52,3 @@ function HeroSection() {
   )
 }
 
-export default HeroSection

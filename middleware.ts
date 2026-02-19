@@ -1,31 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose'; //
-
-const PUBLIC_PATHS = [
-  '/',
-  '/login',
-  '/register',
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/logout',
-];
+import { jwtVerify } from 'jose';
+import { isAdminEmail } from '@/lib/admin';
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  if (PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/_next'))
-    return NextResponse.next();
+  const token = req.cookies.get('token')?.value;
 
-  const token = req.cookies.get('token')?.value; //
-  if (!token) return NextResponse.redirect(new URL('/login', req.url));
+  if (!token) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('next', req.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
 
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET); //
-    await jwtVerify(token, secret);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+
+    const email = String(payload?.email ?? '');
+    if (!isAdminEmail(email)) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+
     return NextResponse.next();
   } catch {
-    const res = NextResponse.redirect(new URL('/login', req.url));
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('next', req.nextUrl.pathname);
+    const res = NextResponse.redirect(url);
     res.cookies.set('token', '', { path: '/', maxAge: 0 });
     return res;
   }
 }
+
+export const config = {
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
+};

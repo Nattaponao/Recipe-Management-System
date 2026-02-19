@@ -1,8 +1,16 @@
-import type { NextConfig } from "next";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'image.makewebcdn.com' },
+      { protocol: 'https', hostname: 's359.kapook.com' },
+      { protocol: 'https', hostname: 'www.jmthaifood.com' },
+      { protocol: 'https', hostname: 'blog.hungryhub.com' },
+    ],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
