@@ -59,9 +59,10 @@ export default function AIPage() {
 
       if (!res.ok) {
         const text = await res.text(); // อ่าน error body
-        throw new Error(`Request failed: ${res.status} ${res.statusText} - ${text}`);
+        throw new Error(
+          `Request failed: ${res.status} ${res.statusText} - ${text}`,
+        );
       }
-
 
       const data: AIResult[] = await res.json();
 
