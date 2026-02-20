@@ -5,9 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
-
 
 model User {
   id              Int            @id @default(autoincrement())
@@ -15,12 +13,10 @@ model User {
   name            String?
   password_hashed String?
   role            String         @default("USER")
+  lastSeen        DateTime?      @db.Timestamptz(6)
   posts           Post[]
   recipe_likes    recipe_likes[]
   recipes         Recipe[]
-  lastSeen DateTime? @db.Timestamptz(6)
-
-  
 }
 
 model Post {
@@ -43,13 +39,11 @@ model Recipe {
   tags           String?
   authorId       Int?               @map("author_id")
   featured_cards featured_cards[]
+  popular_cards  popular_cards[]
   ingredients    RecipeIngredient[]
   recipe_likes   recipe_likes[]
   steps          RecipeStep[]
   author         User?              @relation(fields: [authorId], references: [id])
-  popular_cards popular_cards[]
-
-
 
   @@map("recipes")
 }
@@ -109,11 +103,10 @@ model featured_cards {
 
 model popular_cards {
   id         Int      @id @default(autoincrement())
-  slot       Int      @unique // 1..5
+  slot       Int      @unique
   recipe_id  String   @db.Uuid
-  updated_at DateTime @updatedAt
-
-  recipe Recipe @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+  updated_at DateTime @default(now()) @updatedAt
+  recipe     Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
 
   @@map("popular_cards")
 }
