@@ -9,7 +9,7 @@ export function validateAIResult(data: unknown): data is AIAnalyzeResult[] {
     const obj = item as Record<string, unknown>;
 
     return (
-      typeof obj.recipeId === 'number' &&
+      typeof obj.recipeId === 'string' &&
       typeof obj.recipeName === 'string' &&
       typeof obj.matchScore === 'number' &&
       Array.isArray(obj.missingIngredients) &&
