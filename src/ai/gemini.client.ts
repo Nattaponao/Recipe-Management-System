@@ -12,7 +12,7 @@ export const analyzeSchema: ResponseSchema = {
   items: {
     type: SchemaType.OBJECT,
     properties: {
-      recipeId: { type: SchemaType.NUMBER },
+      recipeId: { type: SchemaType.STRING },
       recipeName: { type: SchemaType.STRING },
       matchScore: { type: SchemaType.NUMBER },
       missingIngredients: {
