@@ -4,15 +4,26 @@ type RecipeLite = {
   ingredients: string[];
 };
 
+function normalize(text: string) {
+  return text.trim().toLowerCase();
+}
+
+function isMatch(userIng: string, recipeIng: string) {
+  const u = normalize(userIng);
+  const r = normalize(recipeIng);
+
+  return r.includes(u) || u.includes(r);
+}
+
 export function scoreRecipesByIngredients(
   recipes: RecipeLite[],
   userIngredients: string[],
 ) {
-  const normalizedUser = userIngredients.map((i) => i.trim().toLowerCase());
+  const normalizedUser = userIngredients.map(normalize);
 
   return recipes.map((recipe) => {
     const matched = recipe.ingredients.filter((ing) =>
-      normalizedUser.includes(ing.toLowerCase()),
+      normalizedUser.some((u) => isMatch(u, ing)),
     );
 
     const score =
@@ -25,7 +36,7 @@ export function scoreRecipesByIngredients(
       recipeName: recipe.name ?? 'ไม่ทราบชื่อ',
       matchScore: score,
       missingIngredients: recipe.ingredients.filter(
-        (ing) => !normalizedUser.includes(ing.toLowerCase()),
+        (ing) => !normalizedUser.some((u) => isMatch(u, ing)),
       ),
       reason: 'คำนวณจากวัตถุดิบในฐานข้อมูล',
     };
