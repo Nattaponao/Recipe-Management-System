@@ -1,7 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useState, KeyboardEvent } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 type AIResult = {
   recipeId: string;
@@ -9,7 +11,7 @@ type AIResult = {
   matchScore: number;
   missingIngredients: string[];
   reason: string;
-  image?: string;
+  coverImage?: string;
 };
 
 export default function AIPage() {
@@ -18,6 +20,7 @@ export default function AIPage() {
   const [results, setResults] = useState<AIResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // ➕ เพิ่ม ingredient ด้วย Enter
   const addIngredient = () => {
@@ -142,40 +145,73 @@ export default function AIPage() {
         </div>
       )}
 
-      {/* RESULTS */}
+      {/* RESULTS SECTION - CARD LAYOUT */}
       {!loading && results.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 pb-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="max-w-6xl mx-auto px-4 pb-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((r) => (
             <div
               key={r.recipeId}
-              className="bg-white text-black rounded-2xl shadow-xl overflow-hidden hover:scale-[1.02] transition"
+              className="bg-white text-black rounded-4xl shadow-2xl shadow-black/20 overflow-hidden hover:scale-[1.03] transition-transform duration-300 flex flex-col"
             >
-              {r.image && (
-                <Image
-                  src={r.image}
-                  alt={r.recipeName}
-                  width={400}
-                  height={160}
-                  className="w-full h-40 object-cover"
-                />
-              )}
+              {/* รูปภาพเมนู */}
+              <div className="relative h-48 w-full bg-gray-200">
+                {r.coverImage ? (
+                  <img
+                    src={r.coverImage}
+                    alt={r.recipeName}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    ไม่มีรูปภาพ
+                  </div>
+                )}
+                {/* Badge คะแนนความเข้ากัน */}
+                <div className="absolute top-4 right-4 bg-[#637402] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                  {r.matchScore}% Match
+                </div>
+              </div>
 
-              <div className="p-5 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">{r.recipeName}</h3>
+              {/* รายละเอียดข้อมูล */}
+              <div className="p-6 flex flex-col flex-1 space-y-4">
+                <h3 className="text-xl font-bold text-[#637402] line-clamp-1">
+                  {r.recipeName}
+                </h3>
 
-                  <span className="text-sm bg-lime-600 text-white px-2 py-1 rounded-lg">
-                    {r.matchScore}%
-                  </span>
+                <p className="text-sm text-gray-600 leading-relaxed italic">
+                  &#34;{r.reason}&#34;
+                </p>
+
+                {/* ส่วนแสดงวัตถุดิบที่ขาด */}
+                <div className="pt-4 border-t border-gray-100">
+                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                    วัตถุดิบที่ต้องหาเพิ่ม
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {r.missingIngredients.length > 0 ? (
+                      r.missingIngredients.map((ing, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-semibold border border-red-100"
+                        >
+                          + {ing}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-lime-600 text-xs font-bold">
+                        ✓ ครบถ้วน พร้อมทำเลย!
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <p className="text-sm text-gray-600">{r.reason}</p>
-
-                {r.missingIngredients.length > 0 && (
-                  <p className="text-sm text-red-500">
-                    ขาด: {r.missingIngredients.join(', ')}
-                  </p>
-                )}
+                {/* ปุ่มดูรายละเอียดสูตร (Optionally) */}
+                <button
+                  onClick={() => router.push(`/recipes/${r.recipeId}`)}
+                  className="mt-auto w-full py-3 bg-[#FE9F4D] hover:bg-[#e88e3d] text-white rounded-xl font-bold transition-colors"
+                >
+                  ดูวิธีทำ
+                </button>
               </div>
             </div>
           ))}
