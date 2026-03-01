@@ -74,8 +74,13 @@ export async function POST(req: Request) {
         steps: true,
       },
     });
+    const safe = JSON.parse(
+      JSON.stringify(recipe, (_key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
 
-    return NextResponse.json(recipe, { status: 201 });
+    return NextResponse.json(safe, { status: 201 });
   } catch (error) {
     console.error('[POST /api/recipes]', error);
     return NextResponse.json(
