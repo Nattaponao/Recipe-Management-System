@@ -15,7 +15,7 @@ export default function ProfileHeader({
     <div className="flex flex-col items-center space-y-4">
       <div className="relative w-32 h-32 md:w-40 md:h-40">
         <Image
-          src={avatar || '/profilemen.jpg'} //
+          src={avatar || '/userprofile.png'} //
           alt="Profile Avatar"
           fill
           className="rounded-full border-4 border-white shadow-lg object-cover"
