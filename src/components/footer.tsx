@@ -1,14 +1,15 @@
-import Link from "next/link";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
-import LogoutButton from "./LogoutButton";
-import { isAdminEmail } from "@/lib/admin";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Link from 'next/link';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
+import LogoutButton from './LogoutButton';
+import { isAdminEmail } from '@/lib/admin';
 
 type NavItem = { label: string; href: string };
 
 export default async function Footer() {
   const cookieStore = await cookies();
-  const token = cookieStore.getAll().find((c) => c.name === "token")?.value;
+  const token = cookieStore.getAll().find((c) => c.name === 'token')?.value;
 
   let isAuthed = false;
   let isAdmin = false;
@@ -25,17 +26,17 @@ export default async function Footer() {
   }
 
   const userMenu: NavItem[] = [
-    { label: "Home", href: "/" },
-    { label: "Recipes", href: "/recipes" },
-    { label: "Ai", href: "/ai" },
-    { label: "Contect", href: "/" },
+    { label: 'Home', href: '/' },
+    { label: 'Recipes', href: '/recipes' },
+    { label: 'Ai', href: '/ai' },
+    { label: 'Contect', href: '/' },
   ];
 
   const adminMenu: NavItem[] = [
-    { label: "Home", href: "/" },
-    { label: "Recipes", href: "admin/recipes" },
-    { label: "Dashboard", href: "/admin" },
-    { label: "Users", href: "/admin/users" },
+    { label: 'Home', href: '/' },
+    { label: 'Recipes', href: 'admin/recipes' },
+    { label: 'Dashboard', href: '/admin' },
+    { label: 'Users', href: '/admin/users' },
   ];
 
   const menu = isAdmin ? adminMenu : userMenu;
