@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, KeyboardEvent } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 type AIResult = {
@@ -12,6 +11,7 @@ type AIResult = {
   missingIngredients: string[];
   reason: string;
   coverImage?: string;
+  description?: string;
 };
 
 export default function AIPage() {
@@ -70,7 +70,9 @@ export default function AIPage() {
       const data: AIResult[] = await res.json();
 
       const sorted = [...data].sort((a, b) => b.matchScore - a.matchScore);
-      setResults(sorted);
+      const canCook = sorted.filter((item) => item.matchScore >= 50);
+
+      setResults(canCook.length > 0 ? canCook : sorted.slice(0, 1));
     } catch (err) {
       console.error(err);
       setError('เกิดข้อผิดพลาดในการวิเคราะห์เมนู');
@@ -147,74 +149,42 @@ export default function AIPage() {
 
       {/* RESULTS SECTION - CARD LAYOUT */}
       {!loading && results.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 pb-20 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {results.map((r) => (
-            <div
-              key={r.recipeId}
-              className="bg-white text-black rounded-4xl shadow-2xl shadow-black/20 overflow-hidden hover:scale-[1.03] transition-transform duration-300 flex flex-col"
-            >
-              {/* รูปภาพเมนู */}
-              <div className="relative h-48 w-full bg-gray-200">
-                {r.coverImage ? (
-                  <img
-                    src={r.coverImage}
-                    alt={r.recipeName}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    ไม่มีรูปภาพ
-                  </div>
-                )}
-                {/* Badge คะแนนความเข้ากัน */}
-                <div className="absolute top-4 right-4 bg-[#637402] text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                  {r.matchScore}% Match
-                </div>
-              </div>
+        <section className="max-w-7xl mx-auto px-6 pb-20">
+          <h2 className="text-center text-2xl font-bold mb-8">recommend</h2>
 
-              {/* รายละเอียดข้อมูล */}
-              <div className="p-6 flex flex-col flex-1 space-y-4">
-                <h3 className="text-xl font-bold text-[#637402] line-clamp-1">
-                  {r.recipeName}
-                </h3>
-
-                <p className="text-sm text-gray-600 leading-relaxed italic">
-                  &#34;{r.reason}&#34;
-                </p>
-
-                {/* ส่วนแสดงวัตถุดิบที่ขาด */}
-                <div className="pt-4 border-t border-gray-100">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                    วัตถุดิบที่ต้องหาเพิ่ม
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {r.missingIngredients.length > 0 ? (
-                      r.missingIngredients.map((ing, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-semibold border border-red-100"
-                        >
-                          + {ing}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-lime-600 text-xs font-bold">
-                        ✓ ครบถ้วน พร้อมทำเลย!
-                      </span>
-                    )}
-                  </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {results.map((r) => (
+              <div
+                key={r.recipeId}
+                onClick={() => router.push(`/recipes/${r.recipeId}`)}
+                className="bg-white text-black rounded-2xl shadow-md overflow-hidden hover:scale-105 hover:shadow-xl transition cursor-pointer"
+              >
+                <div className="h-40 w-full overflow-hidden rounded-t-2xl">
+                  {r.coverImage ? (
+                    <img
+                      src={r.coverImage}
+                      alt={r.recipeName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm bg-gray-200">
+                      ไม่มีรูปภาพ
+                    </div>
+                  )}
                 </div>
 
-                {/* ปุ่มดูรายละเอียดสูตร (Optionally) */}
-                <button
-                  onClick={() => router.push(`/recipes/${r.recipeId}`)}
-                  className="mt-auto w-full py-3 bg-[#FE9F4D] hover:bg-[#e88e3d] text-white rounded-xl font-bold transition-colors"
-                >
-                  ดูวิธีทำ
-                </button>
+                <div className="p-4 space-y-2">
+                  <h3 className="text-sm font-semibold line-clamp-1">
+                    {r.recipeName}
+                  </h3>
+
+                  <p className="text-xs text-gray-500 line-clamp-2">
+                    {r.description ?? r.reason}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       )}
 

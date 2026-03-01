@@ -30,9 +30,13 @@ export async function POST(req: NextRequest) {
     }
 
     const recipes = await prisma.recipe.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
         ingredients: true,
         steps: true,
+        description: true,
+        coverImage: true,
       },
       take: 50,
     });
@@ -57,6 +61,7 @@ export async function POST(req: NextRequest) {
         return {
           ...item,
           coverImage: recipe?.coverImage ?? null,
+          description: recipe?.description ?? '',
         };
       });
     };
