@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useAuth } from '@/app/hooks/useAuth';
@@ -5,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import ProfileHeader from '@/components/profile/ProfileHeader';
-import ProfileStats from '@/components/profile/ProfileStats';
 import ProfileRecipeCard from '@/components/profile/ProfileRecipeCard';
 import ProfileActions from '@/components/profile/ProfileActions';
+import EditProfileModal from '@/components/profile/EditProfileModal';
 
 interface Recipe {
   id: string;
@@ -29,6 +30,7 @@ export default function ProfilePage() {
   const [recipesLoading, setRecipesLoading] = useState(true);
   const [savedLoading, setSavedLoading] = useState(true);
   const [likedLoading, setLikedLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Redirect ถ้าไม่ได้ login
   useEffect(() => {
@@ -162,11 +164,13 @@ export default function ProfilePage() {
               username={`@${authUser.name?.toLowerCase().replace(/\s/g, '') || 'user'}`}
               avatar={authUser.image || '/userprofile.png'}
             />
-            <div className="w-full mt-8 pt-8 border-t border-gray-100 text-[#637402]">
-              <ProfileStats followers={120} following={45} likes={850} />
-            </div>
             <div className="w-full mt-6">
-              <ProfileActions />
+              <ProfileActions
+                onEditProfile={() => setShowEditModal(true)}
+                username={
+                  authUser.name?.toLowerCase().replace(/\s/g, '') ?? 'user'
+                }
+              />
             </div>
           </div>
 
@@ -176,7 +180,7 @@ export default function ProfilePage() {
               {/* Recipes Tab */}
               <button
                 onClick={() => setActiveTab('recipes')}
-                className={`pb-4 flex flex-col items-center gap-1 transition-all relative ${activeTab === 'recipes' ? 'text-black' : 'text-gray-400'}`}
+                className={`pb-4 flex flex-col items-center gap-1 transition-all relative cursor-pointer ${activeTab === 'recipes' ? 'text-black' : 'text-gray-400'}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -195,7 +199,7 @@ export default function ProfilePage() {
               {/* Saved Tab */}
               <button
                 onClick={() => setActiveTab('saved')}
-                className={`pb-4 flex flex-col items-center gap-1 transition-all relative ${activeTab === 'saved' ? 'text-black' : 'text-gray-400'}`}
+                className={`pb-4 flex flex-col items-center gap-1 transition-all relative cursor-pointer ${activeTab === 'saved' ? 'text-black' : 'text-gray-400'}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -214,7 +218,7 @@ export default function ProfilePage() {
               {/* Liked Tab */}
               <button
                 onClick={() => setActiveTab('liked')}
-                className={`pb-4 flex flex-col items-center gap-1 transition-all relative ${activeTab === 'liked' ? 'text-black' : 'text-gray-400'}`}
+                className={`pb-4 flex flex-col items-center gap-1 transition-all relative cursor-pointer ${activeTab === 'liked' ? 'text-black' : 'text-gray-400'}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -246,7 +250,7 @@ export default function ProfilePage() {
                     </span>
                     <button
                       onClick={() => router.push('/recipes/new')}
-                      className="bg-[#637402] text-white w-8 h-8 rounded-lg flex items-center justify-center text-xl font-bold hover:opacity-80 transition"
+                      className="bg-[#637402] text-white w-8 h-8 rounded-lg flex items-center justify-center text-xl font-bold hover:opacity-80 transition cursor-pointer"
                     >
                       +
                     </button>
@@ -262,7 +266,7 @@ export default function ProfilePage() {
                     <p className="text-gray-400">ยังไม่มีสูตรอาหาร</p>
                     <button
                       onClick={() => router.push('/recipes/new')}
-                      className="mt-4 bg-[#637402] text-white px-6 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition"
+                      className="mt-4 bg-[#637402] text-white px-6 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition cursor-pointer"
                     >
                       + เพิ่มสูตรแรก
                     </button>
@@ -281,7 +285,7 @@ export default function ProfilePage() {
                           title={recipe.name ?? ''}
                           image={recipe.coverImage || '/placeholder-food.jpg'}
                           category={recipe.category ?? ''}
-                          author={authUser.name}
+                          author={authUser.name ?? 'Unknown'}
                           date={formatDate(recipe.createdAt)}
                           avatar={authUser.image || '/userprofile.png'}
                         />
@@ -435,6 +439,21 @@ export default function ProfilePage() {
               </>
             )}
           </div>
+
+          {showEditModal && (
+            <EditProfileModal
+              user={authUser}
+              onClose={() => setShowEditModal(false)}
+              onUpdated={(updated: {
+                id: number;
+                name: string | null;
+                email: string;
+                image?: string | null;
+              }) => {
+                window.location.reload();
+              }}
+            />
+          )}
         </div>
       </main>
     </div>

@@ -2,6 +2,13 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+interface User {
+  id: number;
+  name: string | null;
+  email: string;
+  image?: string | null;
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

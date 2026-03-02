@@ -103,7 +103,7 @@ export default function ProfileRecipeCard({
                     e.stopPropagation();
                     setMenuOpen((v) => !v);
                   }}
-                  className="text-gray-400 hover:text-gray-600 px-1"
+                  className="text-gray-400 hover:text-gray-600 px-1 cursor-pointer"
                 >
                   •••
                 </button>
@@ -115,7 +115,7 @@ export default function ProfileRecipeCard({
                         e.stopPropagation();
                         router.push(`/recipes/${id}/edit`);
                       }}
-                      className="w-full text-left px-4 py-3 text-sm text-[#637402] hover:bg-[#F9F7EB] font-medium"
+                      className="w-full text-left px-4 py-3 text-sm text-[#637402] hover:bg-[#F9F7EB] font-medium cursor-pointer"
                     >
                       ✏️ แก้ไข
                     </button>
@@ -123,7 +123,7 @@ export default function ProfileRecipeCard({
                       type="button"
                       disabled={deleting}
                       onClick={handleDelete}
-                      className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 font-medium disabled:opacity-50"
+                      className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 font-medium disabled:opacity-50 cursor-pointer"
                     >
                       🗑️ {deleting ? 'กำลังลบ...' : 'ลบ'}
                     </button>
