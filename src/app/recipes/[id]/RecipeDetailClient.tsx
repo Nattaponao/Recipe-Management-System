@@ -421,7 +421,7 @@ export default function RecipeDetailClient({
                 {recipe.ingredients?.length === 0 ? (
                   <p className="text-gray-500 mt-6">ยังไม่มีวัตถุดิบ</p>
                 ) : (
-                  <ul className="mt-4 bg-[#FEFEF6] rounded-2xl px-8 py-6 text-[18px] shadow-sm">
+                  <ul className="mt-4 bg-[#FEFEF6] rounded-2xl px-8 py-6 text-[18px] shadow-sm text-gray-800">
                     {recipe.ingredients
                       ?.slice()
                       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
@@ -445,9 +445,9 @@ export default function RecipeDetailClient({
           <div className="flex items-center justify-between pb-32">
             <div>
               {recipe.steps.length === 0 ? (
-                <p className="text-gray-500 mt-4">ยังไม่มีขั้นตอน</p>
+                <p className="text-gray-800 mt-4">ยังไม่มีขั้นตอน</p>
               ) : (
-                <ol className="space-y-4">
+                <ol className="space-y-4 text-gray-800">
                   {recipe.steps.map((s) => (
                     <li key={s.id} className="mt-10 flex gap-5">
                       <hr className="w-20 border-0 h-px bg-[#637402] mt-6" />
@@ -463,16 +463,6 @@ export default function RecipeDetailClient({
                   ))}
                 </ol>
               )}
-            </div>
-            <div className="h-[600px] flex items-center justify-center w-100 pr-5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={recipe.coverImage ?? '/nodata.png'}
-                alt={recipe.name}
-                width={400}
-                height={600}
-                className="h-full object-cover"
-              />
             </div>
           </div>
         </div>

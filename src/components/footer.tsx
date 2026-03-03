@@ -29,7 +29,7 @@ export default async function Footer() {
     { label: 'Home', href: '/' },
     { label: 'Recipes', href: '/recipes' },
     { label: 'Ai', href: '/ai' },
-    { label: 'Contect', href: '/' },
+    { label: 'Profile', href: '/profile' },
   ];
 
   const adminMenu: NavItem[] = [

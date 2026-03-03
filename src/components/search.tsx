@@ -112,7 +112,7 @@ export default function SearchRecipeClient({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="ค้นหาเมนู..."
-            className="bg-white w-full px-14 py-3 rounded-3xl outline-none"
+            className="bg-white w-full px-14 py-3 rounded-3xl outline-none text-black placeholder:text-gray-400"
             id="search"
           />
           <span className="absolute left-6 pointer-events-none">
@@ -257,12 +257,9 @@ export default function SearchRecipeClient({
               <div className="grid grid-cols-4 gap-4 mt-4 pb-10">
                 {filteredLocal.map((r) => (
                   <Link key={r.id} href={`/recipes/${r.id}`}>
-                    <div className="text-black rounded-xl bg-[#FEFEF6] w-70 overflow-hidden group flex flex-col h-full">
-                      <div className="py-4">
-                        <h2 className="pl-2 font-semibold">{r.name}</h2>
-                      </div>
-
-                      <div className="h-40 overflow-hidden">
+                    <div className="text-black rounded-2xl bg-[#FEFEF6] overflow-hidden group flex flex-col h-full hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300">
+                      {/* รูปอยู่บนสุด */}
+                      <div className="h-48 overflow-hidden">
                         <img
                           src={
                             r.coverImage ??
@@ -272,9 +269,20 @@ export default function SearchRecipeClient({
                         />
                       </div>
 
-                      <p className="text-sm text-gray-600 py-4 px-3 line-clamp-2">
-                        {r.description}
-                      </p>
+                      {/* ชื่ออยู่ใต้รูป */}
+                      <div className="p-4 flex flex-col gap-2 flex-1">
+                        <h2 className="font-semibold text-black text-[16px] line-clamp-1">
+                          {r.name}
+                        </h2>
+                        <p className="text-sm text-gray-400 line-clamp-2">
+                          {r.description}
+                        </p>
+                        {r.category && (
+                          <span className="text-xs font-semibold px-3 py-1 rounded-full border border-[#637402]/30 text-[#637402] self-start mt-1">
+                            {r.category}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </Link>
                 ))}

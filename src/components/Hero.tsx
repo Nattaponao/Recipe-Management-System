@@ -1,6 +1,6 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 type HeroStore = {
   title1: string;
@@ -13,35 +13,53 @@ type HeroStore = {
 };
 
 const DEFAULT_STORE: HeroStore = {
-  title1: "Pad Krapao",
-  title2: "Moo sub",
-  tag1: "How to",
-  tag2: "Baking",
-  readTime: "12 min read",
-  ctaText: "READ NOW",
-  rightImageDataUrl: "",
+  title1: 'Pad Krapao',
+  title2: 'Moo sub',
+  tag1: 'How to',
+  tag2: 'Baking',
+  readTime: '12 min read',
+  ctaText: 'READ NOW',
+  rightImageDataUrl: '',
 };
 
-const LS_KEY = "hero_inline";
-
-function loadStore(): HeroStore {
+async function loadFromDB(): Promise<HeroStore> {
   try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return DEFAULT_STORE;
-    return { ...DEFAULT_STORE, ...JSON.parse(raw) };
+    const r = await fetch('/api/hero', { cache: 'no-store' });
+    const data = await r.json();
+    return {
+      title1: data.title1,
+      title2: data.title2,
+      tag1: data.tag1,
+      tag2: data.tag2,
+      readTime: data.read_time,
+      ctaText: data.cta_text,
+      rightImageDataUrl: data.right_image_url ?? '',
+    };
   } catch {
     return DEFAULT_STORE;
   }
 }
 
-function saveStore(s: HeroStore) {
-  localStorage.setItem(LS_KEY, JSON.stringify(s));
+async function saveToDB(s: HeroStore) {
+  await fetch('/api/hero', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title1: s.title1,
+      title2: s.title2,
+      tag1: s.tag1,
+      tag2: s.tag2,
+      read_time: s.readTime,
+      cta_text: s.ctaText,
+      right_image_url: s.rightImageDataUrl || null,
+    }),
+  });
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
   return await new Promise((resolve, reject) => {
     const r = new FileReader();
-    r.onload = () => resolve(String(r.result || ""));
+    r.onload = () => resolve(String(r.result || ''));
     r.onerror = reject;
     r.readAsDataURL(file);
   });
@@ -90,7 +108,7 @@ function InlineText({
 
   return (
     <span
-      className={`relative inline-block ${className ?? ""}`}
+      className={`relative inline-block ${className ?? ''}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
@@ -100,10 +118,12 @@ function InlineText({
         contentEditable
         suppressContentEditableWarning
         className="outline-none rounded-md px-1 -mx-1 hover:bg-white/10 focus:bg-white/10 ring-1 ring-transparent hover:ring-white/25 focus:ring-white/35"
-        onInput={(e) => onChange((e.currentTarget as HTMLSpanElement).innerText)}
+        onInput={(e) =>
+          onChange((e.currentTarget as HTMLSpanElement).innerText)
+        }
         onKeyDown={(e) => {
           // กัน Enter ไม่ให้ขึ้นบรรทัดใหม่ใน hero
-          if (e.key === "Enter") {
+          if (e.key === 'Enter') {
             e.preventDefault();
             (e.currentTarget as HTMLSpanElement).blur();
           }
@@ -118,14 +138,16 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
   const [hoverImg, setHoverImg] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
+  // useEffect โหลดข้อมูล
   useEffect(() => {
-    setData(loadStore());
+    loadFromDB().then(setData);
   }, []);
 
+  // patch function
   function patch(partial: Partial<HeroStore>) {
     setData((prev) => {
       const next = { ...prev, ...partial };
-      saveStore(next);
+      saveToDB(next);
       return next;
     });
   }
@@ -136,27 +158,33 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
     patch({ rightImageDataUrl: dataUrl });
   }
 
-  const rightSrc = data.rightImageDataUrl?.startsWith("data:")
+  const rightSrc = data.rightImageDataUrl?.startsWith('data:')
     ? data.rightImageDataUrl
-    : "/kapao.jpeg"; // คง UI เดิม: ถ้าไม่ได้อัปโหลด ใช้ไฟล์เดิม
+    : '/kapao.jpeg'; // คง UI เดิม: ถ้าไม่ได้อัปโหลด ใช้ไฟล์เดิม
 
   return (
     <div className={`bg-[#637402] pb-14`}>
       <div className="flex flex-col md:flex-row justify-between items-center text-white">
         <div className="pl-6 md:pl-19  w-full md:w-auto ">
-          <div className={`text-[48px] font-semibold leading-tight md:text-[100px] md:leading-28 mb-8 md:mb-16 md:pt-10e `}>
+          <div
+            className={`text-[48px] font-semibold leading-tight md:text-[100px] md:leading-28 mb-8 md:mb-16 md:pt-10e `}
+          >
             <h1>
               <InlineText
                 isAdmin={isAdmin}
                 value={data.title1}
-                onChange={(v) => patch({ title1: v.trim() || DEFAULT_STORE.title1 })}
+                onChange={(v) =>
+                  patch({ title1: v.trim() || DEFAULT_STORE.title1 })
+                }
               />
             </h1>
             <h1>
               <InlineText
                 isAdmin={isAdmin}
                 value={data.title2}
-                onChange={(v) => patch({ title2: v.trim() || DEFAULT_STORE.title2 })}
+                onChange={(v) =>
+                  patch({ title2: v.trim() || DEFAULT_STORE.title2 })
+                }
               />
             </h1>
           </div>
@@ -169,14 +197,18 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
                 <InlineText
                   isAdmin={isAdmin}
                   value={data.tag1}
-                  onChange={(v) => patch({ tag1: v.trim() || DEFAULT_STORE.tag1 })}
+                  onChange={(v) =>
+                    patch({ tag1: v.trim() || DEFAULT_STORE.tag1 })
+                  }
                 />
               </button>
               <button className="border rounded-2xl py-1.5 px-7">
                 <InlineText
                   isAdmin={isAdmin}
                   value={data.tag2}
-                  onChange={(v) => patch({ tag2: v.trim() || DEFAULT_STORE.tag2 })}
+                  onChange={(v) =>
+                    patch({ tag2: v.trim() || DEFAULT_STORE.tag2 })
+                  }
                 />
               </button>
             </div>
@@ -184,7 +216,9 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
               <InlineText
                 isAdmin={isAdmin}
                 value={data.readTime}
-                onChange={(v) => patch({ readTime: v.trim() || DEFAULT_STORE.readTime })}
+                onChange={(v) =>
+                  patch({ readTime: v.trim() || DEFAULT_STORE.readTime })
+                }
               />
             </p>
           </div>
@@ -194,7 +228,9 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
               <InlineText
                 isAdmin={isAdmin}
                 value={data.ctaText}
-                onChange={(v) => patch({ ctaText: v.trim() || DEFAULT_STORE.ctaText })}
+                onChange={(v) =>
+                  patch({ ctaText: v.trim() || DEFAULT_STORE.ctaText })
+                }
               />
             </button>
           </div>
@@ -213,7 +249,7 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
           {isAdmin && (
             <div
               className="absolute top-3 right-8 z-10"
-              style={{ pointerEvents: "none" }}
+              style={{ pointerEvents: 'none' }}
             >
               <Pencil show={hoverImg} />
             </div>
@@ -223,11 +259,11 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
             onMouseEnter={() => isAdmin && setHoverImg(true)}
             onMouseLeave={() => isAdmin && setHoverImg(false)}
             onClick={() => isAdmin && fileRef.current?.click()}
-            className={isAdmin ? "cursor-pointer" : ""}
-            title={isAdmin ? "คลิกเพื่ออัปโหลดรูปใหม่" : undefined}
+            className={isAdmin ? 'cursor-pointer' : ''}
+            title={isAdmin ? 'คลิกเพื่ออัปโหลดรูปใหม่' : undefined}
           >
             {/* ถ้าเป็น data url ใช้ img เพื่อไม่ต้องตั้ง next.config */}
-            {rightSrc.startsWith("data:") ? (
+            {rightSrc.startsWith('data:') ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={rightSrc}

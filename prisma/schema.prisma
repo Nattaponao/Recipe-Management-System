@@ -125,3 +125,15 @@ model recipe_saves {
   @@unique([user_id, recipe_id], map: "recipe_saves_user_recipe_unique")
   @@map("recipe_saves")
 }
+
+model hero_settings {
+  id              Int      @id @default(1)
+  title1          String   @default("Pad Krapao")
+  title2          String   @default("Moo sub")
+  tag1            String   @default("How to")
+  tag2            String   @default("Baking")
+  read_time       String   @default("12 min read")
+  cta_text        String   @default("READ NOW")
+  right_image_url String?
+  updated_at      DateTime @updatedAt
+}

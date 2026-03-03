@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
@@ -19,7 +20,12 @@ type SlotData = {
 
 function DefaultAvatarSVG() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="34"
+      height="34"
+      viewBox="0 0 24 24"
+    >
       <g fill="#fff" fillRule="evenodd" clipRule="evenodd">
         <path d="M16 9a4 4 0 1 1-8 0a4 4 0 0 1 8 0m-2 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0" />
         <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11s11-4.925 11-11S18.075 1 12 1M3 12c0 2.09.713 4.014 1.908 5.542A8.99 8.99 0 0 1 12.065 14a8.98 8.98 0 0 1 7.092 3.458A9 9 0 1 0 3 12m9 9a8.96 8.96 0 0 1-5.672-2.012A6.99 6.99 0 0 1 12.065 16a6.99 6.99 0 0 1 5.689 2.92A8.96 8.96 0 0 1 12 21" />
@@ -104,17 +110,48 @@ function Modal({
   );
 }
 
-export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean }) {
-
+export default function RecipeOfWeek({
+  isAdmin = false,
+}: {
+  isAdmin?: boolean;
+}) {
   const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
-
-  function handleToggle(id: string) {
-    setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
-  }
+  const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>({});
 
   // ===== slots from DB =====
-  const [slots, setSlots] = useState<Record<1 | 2 | 3 | 4, SlotData> | null>(null);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slots, setSlots] = useState<Record<1 | 2 | 3 | 4, SlotData> | null>(
+    null,
+  );
+  const [loadingSlots, setLoadingSlots] = useState(true);
+
+  async function handleToggle(id: string) {
+    const r = await fetch(`/api/recipes/${id}/like`, { method: 'POST' });
+    if (r.ok) {
+      const data = await r.json();
+      setLikes((prev) => ({ ...prev, [id]: data.liked }));
+      setLikeCounts((prev) => ({ ...prev, [id]: data.count }));
+    }
+  }
+
+  useEffect(() => {
+    if (!slots) return;
+
+    const ids = [
+      slots[1]?.recipe?.id,
+      slots[2]?.recipe?.id,
+      slots[3]?.recipe?.id,
+      slots[4]?.recipe?.id,
+    ].filter((id): id is string => !!id && id !== '[id]');
+
+    ids.forEach(async (id) => {
+      const r = await fetch(`/api/recipes/${id}/like`);
+      if (r.ok) {
+        const data = await r.json();
+        setLikes((prev) => ({ ...prev, [id]: data.liked }));
+        setLikeCounts((prev) => ({ ...prev, [id]: data.count }));
+      }
+    });
+  }, [slots]);
 
   useEffect(() => {
     (async () => {
@@ -188,7 +225,6 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
         return;
       }
 
-      // ✅ เอาข้อมูลที่ "ครบ" (createdAt + author) กลับมาใหม่ทุกครั้ง
       const rr = await fetch('/api/featured', { cache: 'no-store' });
       const dd = await rr.json().catch(() => ({}));
       const arr: SlotData[] = Array.isArray(dd.slots) ? dd.slots : [];
@@ -202,20 +238,15 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
     }
   }
 
-
   if (loadingSlots || !slots) {
-    return <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <img
-          src="/loading.gif"
-          alt="loading"
-          className="w-32 h-32"
-        />
-        <p className="text-[#637402] font-semibold">
-          กำลังโหลดนะ...
-        </p>
+    return (
+      <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <img src="/loading.gif" alt="loading" className="w-32 h-32" />
+          <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
+        </div>
       </div>
-    </div>
+    );
   }
 
   const left = slots[1].recipe;
@@ -225,15 +256,29 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
 
   // default profile (ตามเดิมของมึง)
   const defaultProfile = (slot: 1 | 2 | 3 | 4) => {
-    if (slot === 1) return { name: 'Peter Pan', date: 'March 20, 2022', avatar: '/person01.jpeg' };
-    return { name: 'Jane Baker', date: 'March 13, 2022', avatar: '/persin02.jpeg' };
+    if (slot === 1)
+      return {
+        name: 'Peter Pan',
+        date: 'March 20, 2022',
+        avatar: '/person01.jpeg',
+      };
+    return {
+      name: 'Jane Baker',
+      date: 'March 13, 2022',
+      avatar: '/persin02.jpeg',
+    };
   };
 
-  const Profile = ({ slot, recipe }: { slot: 1 | 2 | 3 | 4; recipe: RecipePick }) => {
+  const Profile = ({
+    slot,
+    recipe,
+  }: {
+    slot: 1 | 2 | 3 | 4;
+    recipe: RecipePick;
+  }) => {
     const def = defaultProfile(slot);
     const name = recipe.author ? ownerName(recipe, def.name) : def.name;
     const date = formatDate(recipe.createdAt) ?? def.date;
-
 
     // ตอนนี้ user schema ยังไม่มี avatar => ถ้าอยากมี ค่อยเพิ่มทีหลัง
     const avatar: string | null = null;
@@ -242,7 +287,11 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
       <div className="flex items-center gap-4">
         <div className="rounded-full overflow-hidden flex items-center justify-center bg-[#637402]">
           {avatar ? (
-            <img src={avatar} alt="person" className="w-full h-full object-cover" />
+            <img
+              src={avatar}
+              alt="person"
+              className="w-full h-full object-cover"
+            />
           ) : (
             <DefaultAvatarSVG />
           )}
@@ -256,20 +305,51 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
   };
 
   const Heart = ({ id }: { id: string }) => (
-    <p className="cursor-pointer" onClick={(e) => { e.stopPropagation(); handleToggle(id); }}>
+    <div
+      className="flex items-center gap-1 cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleToggle(id);
+      }}
+    >
       {!likes[id] ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24">
-          <path fill="#1C1C1E" d="m12.1 18.55l-.1.1l-.11-.1C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5c1.54 0 3.04 1 3.57 2.36h1.86C13.46 6 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5c0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.41 2 8.5c0 3.77 3.4 6.86 8.55 11.53L12 21.35l1.45-1.32C18.6 15.36 22 12.27 22 8.5C22 5.41 19.58 3 16.5 3" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="34"
+          height="34"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="#1C1C1E"
+            d="m12.1 18.55l-.1.1l-.11-.1C7.14 14.24 4 11.39 4 8.5C4 6.5 5.5 5 7.5 5c1.54 0 3.04 1 3.57 2.36h1.86C13.46 6 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5c0 2.89-3.14 5.74-7.9 10.05M16.5 3c-1.74 0-3.41.81-4.5 2.08C10.91 3.81 9.24 3 7.5 3C4.42 3 2 5.41 2 8.5c0 3.77 3.4 6.86 8.55 11.53L12 21.35l1.45-1.32C18.6 15.36 22 12.27 22 8.5C22 5.41 19.58 3 16.5 3"
+          />
         </svg>
       ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24">
-          <path fill="#db0101" d="m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="34"
+          height="34"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="#db0101"
+            d="m12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5c0 3.77-3.4 6.86-8.55 11.53z"
+          />
         </svg>
       )}
-    </p>
+      {likeCounts[id] !== undefined && (
+        <span className="text-sm text-gray-500">{likeCounts[id]}</span>
+      )}
+    </div>
   );
 
-  const RightCard = ({ slot, recipe }: { slot: 2 | 3 | 4; recipe: RecipePick }) => (
+  const RightCard = ({
+    slot,
+    recipe,
+  }: {
+    slot: 2 | 3 | 4;
+    recipe: RecipePick;
+  }) => (
     <div className="flex w-full bg-[#FEFEF6] px-4 rounded-xl relative overflow-hidden min-w-0">
       {isAdmin && (
         <button
@@ -284,19 +364,21 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
       {/* รูป: ล็อกแค่ความกว้างรูป ไม่ดันทั้งการ์ด */}
       <div className="shrink-0 w-[275px] group overflow-hidden ">
         <img
-          src={recipe.coverImage ?? "/nodata.png"}
-          alt={recipe.name ?? "Recipe"}
+          src={recipe.coverImage ?? '/nodata.png'}
+          alt={recipe.name ?? 'Recipe'}
           className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
         />
       </div>
 
       {/* เนื้อหา: ให้ยุบได้ */}
       <div className="p-5 flex-1 min-w-0">
-        <p className="font-semibold line-clamp-2">{recipe.name ?? "Untitled"}</p>
+        <p className="font-semibold line-clamp-2">
+          {recipe.name ?? 'Untitled'}
+        </p>
 
         <div className="flex items-center justify-between mt-5">
           <p className="py-1.5 px-3 border rounded-3xl text-[14px] font-semibold">
-            {recipe.category ?? "-"}
+            {recipe.category ?? '-'}
           </p>
           <Heart id={recipe.id} />
         </div>
@@ -307,12 +389,10 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
     </div>
   );
 
-
   return (
     <div className="bg-[#F9F7EB] text-black">
       <div className="container mx-auto">
         <div className="grid grid-cols-2 py-20 gap-5">
-
           {/* LEFT */}
           <div className="bg-[#FEFEF6] p-5 rounded-2xl">
             <div className="flex items-center justify-between">
@@ -332,16 +412,17 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
             <div className="flex justify-center">
               <div>
                 <div className="my-7 w-[520px] overflow-hidden ">
-                  <div className="relative w-full group overflow-hidden" style={{ aspectRatio: "5 / 4" }}>
+                  <div
+                    className="relative w-full group overflow-hidden"
+                    style={{ aspectRatio: '5 / 4' }}
+                  >
                     <img
-                      src={left.coverImage ?? "/nodata.png"}
-                      alt={left.name ?? "Recipe"}
+                      src={left.coverImage ?? '/nodata.png'}
+                      alt={left.name ?? 'Recipe'}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                     />
                   </div>
                 </div>
-
-
 
                 <div className="flex justify-between items-center">
                   <p className="text-[14px] font-semibold py-1 px-7 border rounded-3xl">
@@ -363,12 +444,15 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
             <RightCard slot={3} recipe={r2} />
             <RightCard slot={4} recipe={r3} />
           </div>
-
         </div>
       </div>
 
       {/* MODAL */}
-      <Modal open={open} onClose={() => setOpen(false)} title={`เลือกเมนู (slot ${activeSlot})`}>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`เลือกเมนู (slot ${activeSlot})`}
+      >
         <div className="flex gap-2">
           <input
             value={q}
@@ -389,18 +473,14 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
         {loadingRecipes ? (
           <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-              <img
-                src="/loading.gif"
-                alt="loading"
-                className="w-32 h-32"
-              />
-              <p className="text-[#637402] font-semibold">
-                กำลังโหลดนะ...
-              </p>
+              <img src="/loading.gif" alt="loading" className="w-32 h-32" />
+              <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
             </div>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-8 text-center text-gray-500 text-sm">ไม่พบเมนู</div>
+          <div className="py-8 text-center text-gray-500 text-sm">
+            ไม่พบเมนู
+          </div>
         ) : (
           <div className="mt-4 grid grid-cols-2 gap-5 max-h-[55vh] overflow-auto pr-2">
             {filtered.map((r) => {
@@ -413,15 +493,15 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
                   onClick={() => setSelectedRecipeId(r.id)}
                   className={`group text-left rounded-2xl bg-white overflow-hidden transition-all duration-200
             ring-1 ring-black/10
-            ${active ? "ring-2 ring-[#637402] shadow-lg" : "hover:shadow-md hover:ring-black/20"}
+            ${active ? 'ring-2 ring-[#637402] shadow-lg' : 'hover:shadow-md hover:ring-black/20'}
           `}
                 >
                   {/* รูป */}
                   <div className="relative h-[150px] w-full bg-gray-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={r.coverImage ?? "/nodata.png"}
-                      alt={r.name ?? "recipe"}
+                      src={r.coverImage ?? '/nodata.png'}
+                      alt={r.name ?? 'recipe'}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
 
@@ -436,11 +516,11 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
                   {/* เนื้อหา */}
                   <div className="p-3">
                     <div className="font-semibold text-sm leading-snug line-clamp-2">
-                      {r.name ?? "(no name)"}
+                      {r.name ?? '(no name)'}
                     </div>
 
                     <div className="mt-1 text-xs text-gray-500 flex items-center justify-between">
-                      <span className="truncate">{r.category ?? "-"}</span>
+                      <span className="truncate">{r.category ?? '-'}</span>
                       <span className="opacity-0 group-hover:opacity-100 transition text-[#637402]">
                         เลือก →
                       </span>
@@ -451,9 +531,6 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
             })}
           </div>
         )}
-
-
-
       </Modal>
     </div>
   );

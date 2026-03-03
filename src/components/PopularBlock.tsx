@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/jsx-no-comment-textnodes */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
-
+import { useRouter } from 'next/navigation';
 
 type RecipePick = {
   id: string;
@@ -51,11 +52,18 @@ function Modal({
 
   return (
     <div className="fixed inset-0 z-[999]">
-      <button className="absolute inset-0 bg-black/40" onClick={onClose} aria-label="close" />
+      <button
+        className="absolute inset-0 bg-black/40"
+        onClick={onClose}
+        aria-label="close"
+      />
       <div className="absolute left-1/2 top-1/2 w-[min(980px,92vw)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <div className="font-semibold text-[#637402]">{title}</div>
-          <button onClick={onClose} className="rounded-xl border px-3 py-1 text-sm hover:bg-gray-50">
+          <button
+            onClick={onClose}
+            className="rounded-xl border px-3 py-1 text-sm hover:bg-gray-50"
+          >
             ปิด
           </button>
         </div>
@@ -66,8 +74,7 @@ function Modal({
 }
 
 export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
-
-  console.log("PopularBlock isAdmin =", isAdmin);
+  console.log('PopularBlock isAdmin =', isAdmin);
 
   const [slots, setSlots] = useState<SlotRow[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
@@ -80,7 +87,33 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
   const [q, setQ] = useState('');
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
   const [saving, setSaving] = useState(false);
+  const router = useRouter();
+  const [likes, setLikes] = useState<Record<string, boolean>>({});
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
 
+  useEffect(() => {
+    if (!slots.length) return;
+    const ids = slots
+      .map((s) => s.recipe?.id)
+      .filter((id): id is string => !!id);
+    ids.forEach(async (id) => {
+      const r = await fetch(`/api/recipes/${id}/like`);
+      if (r.ok) {
+        const data = await r.json();
+        setLikes((prev) => ({ ...prev, [id]: data.liked }));
+        setLikeCounts((prev) => ({ ...prev, [id]: data.count }));
+      }
+    });
+  }, [slots]);
+
+  async function handleLike(id: string) {
+    const r = await fetch(`/api/recipes/${id}/like`, { method: 'POST' });
+    if (r.ok) {
+      const data = await r.json();
+      setLikes((prev) => ({ ...prev, [id]: data.liked }));
+      setLikeCounts((prev) => ({ ...prev, [id]: data.count }));
+    }
+  }
   async function loadSlots() {
     setLoadingSlots(true);
     try {
@@ -140,7 +173,11 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
       }
 
       // update local (ไม่ต้องรี)
-      setSlots((prev) => prev.map((x) => (x.slot === activeSlot ? { ...x, recipe: data.recipe } : x)));
+      setSlots((prev) =>
+        prev.map((x) =>
+          x.slot === activeSlot ? { ...x, recipe: data.recipe } : x,
+        ),
+      );
       setOpen(false);
     } finally {
       setSaving(false);
@@ -152,8 +189,14 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
     { name: 'Green Curry', desc: 'All green and fresh soup' },
     { name: 'Tom Yum Goong', desc: 'Gluten free with potato crust!' },
     { name: 'Pad Thai', desc: 'Easy one-pot meal for dinners.' },
-    { name: 'Red pork over rice', desc: 'Fancy flavors and textures you need to try.' },
-    { name: 'Stir-fried Chicken with cashew nuts', desc: 'Springy, light and yet comforting bowl of pasta.' },
+    {
+      name: 'Red pork over rice',
+      desc: 'Fancy flavors and textures you need to try.',
+    },
+    {
+      name: 'Stir-fried Chicken with cashew nuts',
+      desc: 'Springy, light and yet comforting bowl of pasta.',
+    },
   ];
 
   return (
@@ -168,31 +211,45 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {loadingSlots ? (
-        <div className="py-10 text-center text-gray-500 text-sm">กำลังโหลด...</div>
+        <div className="py-10 text-center text-gray-500 text-sm">
+          กำลังโหลด...
+        </div>
       ) : (
         <div className="grid grid-cols-5 mt-10 place-items-center cards-focus gap-6">
-          {(slots.length ? slots : ([1, 2, 3, 4, 5] as any).map((s: number, i: number) => ({ slot: s, recipe: null }))).map((s, i) => {
+          {(slots.length
+            ? slots
+            : ([1, 2, 3, 4, 5] as any).map((s: number, i: number) => ({
+                slot: s,
+                recipe: null,
+              }))
+          ).map((s, i) => {
             const r = s.recipe;
             const fb = fallbackCards[i] ?? fallbackCards[0];
 
             return (
-              <div key={s.slot} className="bg-[#FEFEF6] rounded-3xl flex flex-col pt-6 w-60 card relative">
+              <div
+                key={s.slot}
+                className="bg-[#FEFEF6] rounded-3xl flex flex-col w-60 card relative overflow-hidden cursor-pointer hover:shadow-xl hover:translate-y-[-5px] transition-all duration-300"
+                onClick={() => r && router.push(`/recipes/${r.id}`)}
+              >
                 {isAdmin && (
                   <button
                     type="button"
-                    onClick={() => openEditor(s.slot)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditor(s.slot);
+                    }}
                     className="absolute right-3 top-3 text-xs px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30 z-10"
                   >
                     Edit
                   </button>
                 )}
 
-                {/* รูป — บังคับขนาดให้เท่า mockup */}
-                <div className="w-60 h-[190px] overflow-hidden">
+                <div className="w-full h-[190px] overflow-hidden group">
                   <img
-                    src={(r?.coverImage ?? '/GreenCurry.png') as any}
-                    alt={(r?.name ?? fb.name) as any}
-                    className="w-full h-full object-cover"
+                    src={r?.coverImage ?? '/GreenCurry.png'}
+                    alt={r?.name ?? fb.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
 
@@ -208,24 +265,43 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
                   </div>
 
                   {/* ยอดไลก์ */}
-                  <div className="flex items-center justify-between text-xs mt-2">
-                    <span className="text-[#637402]/80">
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full border border-[#637402]/30 text-[#637402]">
                       {r?.category ?? '-'}
                     </span>
-                    <span className="text-black/60">
-                      ♥ {r?.likesCount ?? 0}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        r && handleLike(r.id);
+                      }}
+                      className="flex items-center gap-1 text-sm cursor-pointer"
+                    >
+                      <span
+                        className={
+                          likes[r?.id ?? ''] ? 'text-red-500' : 'text-gray-400'
+                        }
+                      >
+                        ♥
+                      </span>
+                      <span className="text-black/60">
+                        {likeCounts[r?.id ?? ''] ?? r?.likesCount ?? 0}
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
             );
-
           })}
         </div>
       )}
 
       {/* MODAL */}
-      <Modal open={open} onClose={() => setOpen(false)} title={`เลือกเมนู Popular (slot ${activeSlot})`}>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`เลือกเมนู Popular (slot ${activeSlot})`}
+      >
         <div className="flex gap-2">
           <input
             value={q}
@@ -244,9 +320,13 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
         </div>
 
         {loadingRecipes ? (
-          <div className="py-8 text-center text-gray-500 text-sm">กำลังโหลด...</div>
+          <div className="py-8 text-center text-gray-500 text-sm">
+            กำลังโหลด...
+          </div>
         ) : filtered.length === 0 ? (
-          <div className="py-8 text-center text-gray-500 text-sm">ไม่พบเมนู</div>
+          <div className="py-8 text-center text-gray-500 text-sm">
+            ไม่พบเมนู
+          </div>
         ) : (
           <div className="mt-4 grid grid-cols-2 gap-4 max-h-[55vh] overflow-auto pr-2">
             {filtered.map((r) => {
@@ -262,11 +342,19 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
                   `}
                 >
                   <div className="h-[120px] w-full bg-gray-100 overflow-hidden">
-                    <img src={r.coverImage ?? '/nodata.png'} alt={r.name ?? 'recipe'} className="w-full h-full object-cover" />
+                    <img
+                      src={r.coverImage ?? '/nodata.png'}
+                      alt={r.name ?? 'recipe'}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="p-3">
-                    <div className="font-semibold text-sm line-clamp-2">{r.name ?? '(no name)'}</div>
-                    <div className="text-xs text-gray-500 mt-1">{r.category ?? '-'}</div>
+                    <div className="font-semibold text-sm line-clamp-2">
+                      {r.name ?? '(no name)'}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {r.category ?? '-'}
+                    </div>
                   </div>
                 </button>
               );

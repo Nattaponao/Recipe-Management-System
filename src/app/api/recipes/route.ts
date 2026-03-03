@@ -2,9 +2,22 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/recipes
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get('category');
+
   const recipes = await prisma.recipe.findMany({
+    where: category
+      ? { category: { contains: category, mode: 'insensitive' } }
+      : undefined,
     orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      name: true,
+      coverImage: true,
+      category: true,
+      description: true,
+    },
   });
 
   return NextResponse.json(recipes);

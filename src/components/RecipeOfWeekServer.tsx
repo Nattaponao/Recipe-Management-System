@@ -1,11 +1,12 @@
-import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
-import RecipeOfWeek from "@/components/RecipeOfWeek";
-import { isAdminEmail } from "@/lib/admin";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
+import RecipeOfWeek from '@/components/RecipeOfWeek';
+import { isAdminEmail } from '@/lib/admin';
 
 export default async function RecipeOfWeekServer() {
   const cookieStore = await cookies();
-  const token = cookieStore.getAll().find((c) => c.name === "token")?.value;
+  const token = cookieStore.getAll().find((c) => c.name === 'token')?.value;
 
   let isAdmin = false;
 
