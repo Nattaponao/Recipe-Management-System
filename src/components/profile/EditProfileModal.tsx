@@ -131,7 +131,7 @@ export default function EditProfileModal({ user, onClose, onUpdated }: Props) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#6B8E23]"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-[#6B8E23]"
             />
           </div>
 
@@ -144,7 +144,7 @@ export default function EditProfileModal({ user, onClose, onUpdated }: Props) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#6B8E23]"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-[#6B8E23]"
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function EditProfileModal({ user, onClose, onUpdated }: Props) {
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="ใส่รหัสผ่านปัจจุบัน"
-              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#6B8E23]"
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-[#6B8E23]"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function EditProfileModal({ user, onClose, onUpdated }: Props) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="รหัสผ่านใหม่"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#6B8E23]"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-[#6B8E23]"
               />
             </div>
           )}
@@ -189,7 +189,7 @@ export default function EditProfileModal({ user, onClose, onUpdated }: Props) {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="ยืนยันรหัสผ่านใหม่"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#6B8E23]"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-[#6B8E23]"
               />
             </div>
           )}

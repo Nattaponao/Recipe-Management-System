@@ -9,6 +9,10 @@ import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { isAdminEmail } from '@/lib/admin';
 
+export const metadata = {
+  title: 'Khang Saeb | Recipes',
+};
+
 export default async function RecipesPage() {
   const recipes = await prisma.recipe.findMany({
     orderBy: { createdAt: 'desc' },

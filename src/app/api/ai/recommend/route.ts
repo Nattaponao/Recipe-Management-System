@@ -24,8 +24,13 @@ export async function POST(req: NextRequest) {
       where: { ingredients_key: key },
     });
 
-    if (cached) {
-      console.log('⚡ use AI cache');
+    const CACHE_TTL_DAYS = 7;
+    const isExpired =
+      cached &&
+      Date.now() - new Date(cached.created_at).getTime() >
+        CACHE_TTL_DAYS * 86400000;
+
+    if (cached && !isExpired) {
       return NextResponse.json(cached.result_json);
     }
 
@@ -53,7 +58,6 @@ export async function POST(req: NextRequest) {
       (a, b) => b.matchScore - a.matchScore,
     );
 
-    // 🔥 helper merge รูป
     const mergeImage = (list: AIAnalyzeResult[]) => {
       return list.map((item) => {
         const recipe = recipes.find((r) => r.id === item.recipeId);
@@ -66,12 +70,18 @@ export async function POST(req: NextRequest) {
       });
     };
 
-    if (scored.length > 0 && scored[0].matchScore >= 30) {
+    if (scored.length > 0 && scored[0].matchScore >= 70) {
       console.log('⚡ use DB scoring (skip AI)');
-
       const top5 = scored.slice(0, 5);
+      const result = mergeImage(top5);
 
-      return NextResponse.json(mergeImage(top5));
+      await prisma.ai_cache.upsert({
+        where: { ingredients_key: key },
+        update: { result_json: result, created_at: new Date() },
+        create: { ingredients_key: key, result_json: result },
+      });
+
+      return NextResponse.json(result);
     }
 
     const TOP_N = 10;
@@ -92,14 +102,19 @@ export async function POST(req: NextRequest) {
         recipeName: r.recipeName ?? 'ไม่ทราบชื่อเมนู',
         matchScore: r.matchScore,
         missingIngredients: r.missingIngredients,
-        reason: 'แนะนำจากฐานข้อมูล (AI ไม่พร้อมใช้งาน)',
+        reason: 'แนะนำจากฐานข้อมูล',
       }));
     }
 
     const finalResult = mergeImage(analyzed);
 
-    await prisma.ai_cache.create({
-      data: {
+    await prisma.ai_cache.upsert({
+      where: { ingredients_key: key },
+      update: {
+        result_json: finalResult,
+        created_at: new Date(),
+      },
+      create: {
         ingredients_key: key,
         result_json: finalResult,
       },

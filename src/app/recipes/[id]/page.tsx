@@ -4,10 +4,26 @@ import NavbarV2 from '@/components/navV2';
 import Footer from '@/components/footer';
 import RecipeDetailClient from './RecipeDetailClient';
 import { Prisma } from '@prisma/client';
+import { fredoka } from '@/lib/fonts';
 
 type Props = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const recipe = await prisma.recipe.findUnique({
+    where: { id },
+    select: { name: true },
+  });
+  return {
+    title: `Khang Saeb | ${recipe?.name ?? 'Recipe'}`,
+  };
+}
 
 export default async function RecipeDetailPage({ params }: Props) {
   const { id } = await params;
@@ -35,7 +51,7 @@ export default async function RecipeDetailPage({ params }: Props) {
   );
 
   return (
-    <div>
+    <div className={fredoka.className}>
       <NavbarV2 />
       <RecipeDetailClient recipe={recipeSafe} />
       <Footer />

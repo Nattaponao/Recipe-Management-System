@@ -92,10 +92,10 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F7EB]">
-        <div className="text-[#637402] text-xl font-bold animate-bounce">
-          กำลังเปิดคลังแซ่บ...
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F9F7EB] gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/loading.gif" alt="loading" className="w-32 h-32" />
+        <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
       </div>
     );
 
