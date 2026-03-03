@@ -1,8 +1,9 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
 
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic';
 
-const Search = dynamic(() => import("@/components/search"), { ssr: false });
+const Search = dynamic(() => import('@/components/search'), { ssr: false });
 
 export default function SearchNoSSR(props: any) {
   return <Search {...props} />;

@@ -8,11 +8,17 @@ datasource db {
 }
 
 model User {
-  id              Int     @id @default(autoincrement())
-  email           String  @unique
+  id              Int            @id @default(autoincrement())
+  email           String         @unique
   name            String?
   password_hashed String?
+  role            String         @default("USER")
+  image           String?
+  lastSeen        DateTime?      @db.Timestamptz(6)
   posts           Post[]
+  recipe_likes    recipe_likes[]
+  recipeSaves     recipe_saves[]
+  recipes         Recipe[]
 }
 
 model Post {
@@ -20,46 +26,114 @@ model Post {
   title     String
   content   String?
   published Boolean @default(false)
-
   authorId  Int
   author    User    @relation(fields: [authorId], references: [id])
 }
 
 model Recipe {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  coverImage  String?  @map("cover_image")
-  category    String
-  country     String
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  ingredients RecipeIngredient[]
-  steps       RecipeStep[]
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  name           String?            @default("")
+  description    String?
+  coverImage     String?            @map("cover_image")
+  category       String?
+  country        String?
+  tags           String?
+  authorId       Int?               @map("author_id")
+  featured_cards featured_cards[]
+  popular_cards  popular_cards[]
+  ingredients    RecipeIngredient[]
+  recipe_likes   recipe_likes[]
+  recipeSaves    recipe_saves[]
+  steps          RecipeStep[]
+  author         User?              @relation(fields: [authorId], references: [id])
 
   @@map("recipes")
 }
 
 model RecipeIngredient {
-  id        String  @id @default(uuid())
-  recipeId  String  @map("recipe_id")
-  name      String
-  amount    Float?
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipeId  String?  @default(dbgenerated("gen_random_uuid()")) @map("recipe_id") @db.Uuid
+  name      String?
+  amount    Decimal? @db.Decimal
   unit      String?
-  sortOrder Int?    @map("sort_order")
-
-  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  sortOrder BigInt?  @map("sort_order")
+  recipe    Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("recipe_ingredients")
 }
 
 model RecipeStep {
-  id       String @id @default(uuid())
-  recipeId String @map("recipe_id")
-  stepNo   Int    @map("step_no")
-  text     String
-
-  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipeId String? @default(dbgenerated("gen_random_uuid()")) @map("recipe_id") @db.Uuid
+  stepNo   BigInt? @map("step_no")
+  text     String?
+  recipe   Recipe? @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("recipe_steps")
+}
+
+model ai_cache {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ingredients_key String   @unique
+  result_json     Json
+  created_at      DateTime @default(now())
+}
+
+model recipe_likes {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    Int
+  recipe_id  String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  recipes    Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, recipe_id], map: "recipe_likes_user_recipe_unique")
+}
+
+model featured_cards {
+  id             Int      @id @default(autoincrement())
+  slot           Int      @unique
+  recipe_id      String   @db.Uuid
+  profile_name   String?
+  profile_date   String?
+  profile_avatar String?
+  updated_at     DateTime @updatedAt
+  recipe         Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+
+  @@map("featured_cards")
+}
+
+model popular_cards {
+  id         Int      @id @default(autoincrement())
+  slot       Int      @unique
+  recipe_id  String   @db.Uuid
+  updated_at DateTime @default(now()) @updatedAt
+  recipe     Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+
+  @@map("popular_cards")
+}
+
+model recipe_saves {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    Int
+  recipe_id  String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  recipes    Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, recipe_id], map: "recipe_saves_user_recipe_unique")
+  @@map("recipe_saves")
+}
+
+model hero_settings {
+  id              Int      @id @default(1)
+  title1          String   @default("Pad Krapao")
+  title2          String   @default("Moo sub")
+  tag1            String   @default("How to")
+  tag2            String   @default("Baking")
+  read_time       String   @default("12 min read")
+  cta_text        String   @default("READ NOW")
+  right_image_url String?
+  updated_at      DateTime @updatedAt
 }
