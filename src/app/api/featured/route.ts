@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   const rows = await prisma.featured_cards.findMany({
@@ -11,11 +12,13 @@ export async function GET() {
           coverImage: true,
           category: true,
           createdAt: true,
-          author: { select: { id: true, name: true, email: true } },
+          author: {
+            select: { id: true, name: true, email: true, image: true },
+          },
         },
       },
     },
-    orderBy: { slot: "asc" },
+    orderBy: { slot: 'asc' },
   });
 
   const bySlot = new Map<number, any>();
@@ -26,20 +29,29 @@ export async function GET() {
     recipe: {
       id: `fallback-${slot}`,
       name:
-        slot === 1 ? "Green Sweet Curry" :
-        slot === 2 ? "Noodle Chicken soup" :
-        slot === 3 ? "Clear soup with bean curd and minced pork" :
-        "Pad thai",
+        slot === 1
+          ? 'Green Sweet Curry'
+          : slot === 2
+            ? 'Noodle Chicken soup'
+            : slot === 3
+              ? 'Clear soup with bean curd and minced pork'
+              : 'Pad thai',
       coverImage:
-        slot === 1 ? "/GreenSweet.jpeg" :
-        slot === 2 ? "/tomyum.jpeg" :
-        slot === 3 ? "/01.jpeg" :
-        "/padthai.jpeg",
+        slot === 1
+          ? '/GreenSweet.jpeg'
+          : slot === 2
+            ? '/tomyum.jpeg'
+            : slot === 3
+              ? '/01.jpeg'
+              : '/padthai.jpeg',
       category:
-        slot === 1 ? "curry" :
-        slot === 2 ? "Noodles" :
-        slot === 3 ? "soup" :
-        "Noodles",
+        slot === 1
+          ? 'curry'
+          : slot === 2
+            ? 'Noodles'
+            : slot === 3
+              ? 'soup'
+              : 'Noodles',
       createdAt: null,
       author: null,
     },

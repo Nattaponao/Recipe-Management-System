@@ -58,18 +58,20 @@ export default function SearchRecipeClient({
   // ✅ client-side filter (กันกรณี API ไม่กรอง/ค่าไม่ match)
   const filteredLocal = useMemo(() => {
     const q = normalize(query);
-    return safeRecipes.filter((r) => {
+    return initialRecipes.filter((r) => {
       const okQ =
         !q ||
         normalize(r.name ?? '').includes(q) ||
         normalize(r.description ?? '').includes(q);
 
-      const okCat = !category || (r.category ?? '') === category;
-      const okCountry = !country || (r.country ?? '') === country;
+      const okCat =
+        !category || normalize(r.category ?? '') === normalize(category);
+      const okCountry =
+        !country || normalize(r.country ?? '') === normalize(country);
 
       return okQ && okCat && okCountry;
     });
-  }, [safeRecipes, query, category, country]);
+  }, [initialRecipes, query, category, country]);
 
   const itemsText = useMemo(
     () => `${filteredLocal.length} items`,
@@ -234,8 +236,9 @@ export default function SearchRecipeClient({
 
         <div className="mt-16">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <img src="/loading.gif" alt="loading" className="w-24 h-24" />
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#637402] border-t-transparent" />
+              <p className="text-[#637402] font-semibold">กำลังโหลด...</p>
             </div>
           ) : (
             <>

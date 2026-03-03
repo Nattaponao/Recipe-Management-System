@@ -86,13 +86,13 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                 name="q"
                 defaultValue={sp.q ?? ''}
                 placeholder="เช่น admin@gmail.com หรือ Peter"
-                className="mt-2 w-full border border-[#637402]/30 rounded-lg px-4 py-2 outline-none focus:border-[#637402]"
+                className="mt-2 w-full border border-[#637402]/30 rounded-lg px-4 py-2 outline-none focus:border-[#637402] text-gray-400"
               />
             </div>
 
             <button
               type="submit"
-              className="bg-[#637402] text-white px-6 py-2 rounded-lg hover:opacity-90 transition md:self-end"
+              className="bg-[#637402] text-white px-6 py-2 rounded-lg hover:opacity-90 transition md:self-end cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +139,12 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                     </td>
                     <td className="p-4 text-[#637402]/80">{u.email}</td>
                     <td className="p-4">
-                      <RoleSelect id={u.id} role={u.role ?? 'USER'} />
+                      <div className="flex items-center gap-2">
+                        <RoleSelect id={u.id} role={u.role ?? 'USER'} />
+                        <span className="text-xs text-gray-500">
+                          {u.role ?? 'USER'}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4">
                       <div className="flex justify-end">

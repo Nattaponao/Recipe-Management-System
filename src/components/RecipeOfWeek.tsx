@@ -10,7 +10,12 @@ type RecipePick = {
   coverImage: string | null;
   category: string | null;
   createdAt?: string | null;
-  author?: { id: number; name: string | null; email: string } | null;
+  author?: {
+    id: number;
+    name: string | null;
+    email: string;
+    image?: string | null;
+  } | null;
 };
 
 type SlotData = {
@@ -90,7 +95,7 @@ function Modal({
       <button
         type="button"
         aria-label="close overlay"
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/40 cursor-pointer"
         onClick={onClose}
       />
       <div className="absolute left-1/2 top-1/2 w-[min(980px,92vw)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl">
@@ -99,7 +104,7 @@ function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border px-3 py-1 text-sm hover:bg-gray-50"
+            className="rounded-xl border px-3 py-1 text-sm hover:bg-gray-50 cursor-pointer"
           >
             ปิด
           </button>
@@ -280,12 +285,11 @@ export default function RecipeOfWeek({
     const name = recipe.author ? ownerName(recipe, def.name) : def.name;
     const date = formatDate(recipe.createdAt) ?? def.date;
 
-    // ตอนนี้ user schema ยังไม่มี avatar => ถ้าอยากมี ค่อยเพิ่มทีหลัง
-    const avatar: string | null = null;
+    const avatar: string | null = recipe.author?.image ?? null;
 
     return (
       <div className="flex items-center gap-4">
-        <div className="rounded-full overflow-hidden flex items-center justify-center bg-[#637402]">
+        <div className="w-[34px] h-[34px] rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-[#637402]">
           {avatar ? (
             <img
               src={avatar}
@@ -355,7 +359,7 @@ export default function RecipeOfWeek({
         <button
           type="button"
           onClick={() => openEditor(slot)}
-          className="absolute right-3 top-3 text-xs px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30 z-10"
+          className="absolute right-3 top-3 text-xs px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30 z-10 cursor-pointer"
         >
           Edit
         </button>
@@ -402,7 +406,7 @@ export default function RecipeOfWeek({
                 <button
                   type="button"
                   onClick={() => openEditor(1)}
-                  className="text-sm px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30"
+                  className="text-sm px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30 cursor-pointer"
                 >
                   Edit
                 </button>
@@ -464,18 +468,16 @@ export default function RecipeOfWeek({
             type="button"
             onClick={saveSlot}
             disabled={saving || !selectedRecipeId}
-            className="px-4 py-2 rounded-xl bg-[#637402] text-white disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-[#637402] text-white disabled:opacity-50 cursor-pointer"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
 
         {loadingRecipes ? (
-          <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <img src="/loading.gif" alt="loading" className="w-32 h-32" />
-              <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
-            </div>
+          <div className="py-10 flex flex-col items-center justify-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#637402] border-t-transparent" />
+            <p className="text-[#637402] font-semibold">กำลังโหลด...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-8 text-center text-gray-500 text-sm">
@@ -492,7 +494,7 @@ export default function RecipeOfWeek({
                   type="button"
                   onClick={() => setSelectedRecipeId(r.id)}
                   className={`group text-left rounded-2xl bg-white overflow-hidden transition-all duration-200
-            ring-1 ring-black/10
+            ring-1 ring-black/10 cursor-pointer
             ${active ? 'ring-2 ring-[#637402] shadow-lg' : 'hover:shadow-md hover:ring-black/20'}
           `}
                 >

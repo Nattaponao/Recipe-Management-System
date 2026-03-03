@@ -20,7 +20,7 @@ export default function AIPage() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [results, setResults] = useState<AIResult[]>([]);
   const [loadingSearch, setLoadingSearch] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [searched, setSearched] = useState(false);
   const { user: authUser, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -33,8 +33,9 @@ export default function AIPage() {
 
   if (authLoading)
     return (
-      <div className="min-h-screen bg-[#F9F7EB] flex flex-col items-center justify-center gap-4">
-        <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
+      <div className="min-h-screen bg-[#637402] flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-yellow-400 border-t-transparent" />
+        <p className="text-yellow-400 font-semibold">กำลังโหลด...</p>
       </div>
     );
 
@@ -65,7 +66,8 @@ export default function AIPage() {
     setSearched(true);
     try {
       setLoadingSearch(true);
-      setError(null);
+      setNotFound(false);
+      setResults([]);
 
       const res = await fetch('/api/ai/recommend', {
         method: 'POST',
@@ -82,11 +84,14 @@ export default function AIPage() {
 
       const data: AIResult[] = await res.json();
       const sorted = [...data].sort((a, b) => b.matchScore - a.matchScore);
-      const canCook = sorted.filter((item) => item.matchScore >= 50);
-      setResults(canCook.length > 0 ? canCook : sorted.slice(0, 1));
+      const canCook = sorted.filter((item) => item.matchScore > 0);
+      if (canCook.length === 0) {
+        setNotFound(true);
+      } else {
+        setResults(canCook);
+      }
     } catch (err) {
-      console.error(err);
-      setError('เกิดข้อผิดพลาดในการวิเคราะห์เมนู');
+      setNotFound(true);
     } finally {
       setLoadingSearch(false);
     }
@@ -137,14 +142,16 @@ export default function AIPage() {
               ))}
             </div>
           )}
-
-          {error && <p className="text-red-200 mt-2">{error}</p>}
         </div>
       </section>
 
-      {loadingSearch && (
-        <div className="flex justify-center pb-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+      {!loadingSearch && searched && notFound && (
+        <div className="flex justify-center pb-20">
+          <img
+            src="/nodata.png"
+            alt="ไม่พบสูตร"
+            className="w-64 h-64 object-contain"
+          />
         </div>
       )}
 
@@ -184,15 +191,12 @@ export default function AIPage() {
           </div>
         </section>
       )}
-
-      {!loadingSearch &&
-        searched &&
-        results.length === 0 &&
-        ingredients.length > 0 && (
-          <p className="text-center text-lime-200 pb-20">
-            ไม่พบเมนูที่เหมาะกับวัตถุดิบนี้ 😢
-          </p>
-        )}
+      {loadingSearch && (
+        <div className="flex flex-col items-center justify-center pb-10 gap-3">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+          <p className="text-lime-100 text-sm">AI กำลังวิเคราะห์เมนู...</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -53,7 +53,7 @@ function Modal({
   return (
     <div className="fixed inset-0 z-[999]">
       <button
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/40 cursor-pointer"
         onClick={onClose}
         aria-label="close"
       />
@@ -62,7 +62,7 @@ function Modal({
           <div className="font-semibold text-[#637402]">{title}</div>
           <button
             onClick={onClose}
-            className="rounded-xl border px-3 py-1 text-sm hover:bg-gray-50"
+            className="rounded-xl border px-3 py-1 text-sm hover:bg-gray-50 cursor-pointer"
           >
             ปิด
           </button>
@@ -239,7 +239,7 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
                       e.stopPropagation();
                       openEditor(s.slot);
                     }}
-                    className="absolute right-3 top-3 text-xs px-3 py-1 rounded-xl border border-[#637402]/30 text-[#637402] hover:bg-[#DFD3A4]/30 z-10"
+                    className="absolute right-2 top-2 text-xs px-2 py-1 rounded-lg bg-white/80 border border-[#637402]/40 text-[#637402] hover:bg-white z-10 cursor-pointer shadow-sm"
                   >
                     Edit
                   </button>
@@ -313,7 +313,7 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
             type="button"
             onClick={saveSlot}
             disabled={saving || !selectedRecipeId}
-            className="px-4 py-2 rounded-xl bg-[#637402] text-white disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-[#637402] text-white disabled:opacity-50 cursor-pointer"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
@@ -337,16 +337,21 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
                   type="button"
                   onClick={() => setSelectedRecipeId(r.id)}
                   className={`text-left rounded-2xl bg-white overflow-hidden transition-all duration-200
-                    ring-1 ring-black/10
+                    ring-1 ring-black/10 cursor-pointer
                     ${active ? 'ring-2 ring-[#637402] shadow-md' : 'hover:shadow-sm hover:ring-black/20'}
                   `}
                 >
-                  <div className="h-[120px] w-full bg-gray-100 overflow-hidden">
+                  <div className="h-[120px] w-full bg-gray-100 overflow-hidden relative">
                     <img
                       src={r.coverImage ?? '/nodata.png'}
                       alt={r.name ?? 'recipe'}
                       className="w-full h-full object-cover"
                     />
+                    {active && (
+                      <div className="absolute top-2 right-2 text-[11px] px-2 py-1 rounded-full bg-[#637402] text-white shadow">
+                        เลือกแล้ว
+                      </div>
+                    )}
                   </div>
                   <div className="p-3">
                     <div className="font-semibold text-sm line-clamp-2">

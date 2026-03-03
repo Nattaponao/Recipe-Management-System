@@ -207,7 +207,6 @@ export default function HeroSection3({ isAdmin }: { isAdmin: boolean }) {
               {loadingRecipes ? (
                 <div className="py-20 flex flex-col items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/loading.gif" alt="loading" className="w-16 h-16" />
                   <p className="text-[#637402] text-sm">กำลังโหลด...</p>
                 </div>
               ) : categoryRecipes.length === 0 ? (
