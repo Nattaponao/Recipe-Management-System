@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import NavbarV2 from './navV2';
 
 export default function NavbarAuthClient() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -17,7 +19,14 @@ export default function NavbarAuthClient() {
       .catch(() => setLoaded(true));
   }, []);
 
-  if (!loaded) return <div className="h-[72px]" />;
+  if (!loaded) {
+    const isGreen = ['/', '/ai'].includes(pathname);
+    return (
+      <div
+        className={`${isGreen ? 'bg-[#637402]' : 'bg-[#F9F7EB]'} h-[104px]`}
+      />
+    );
+  }
 
   return <NavbarV2 isAdmin={isAdmin} />;
 }
