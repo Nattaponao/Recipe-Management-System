@@ -6,6 +6,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type RecipePick = {
   id: string;
@@ -245,11 +246,13 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
                   </button>
                 )}
 
-                <div className="w-full h-[190px] overflow-hidden group">
-                  <img
+                <div className="w-full h-[190px] overflow-hidden group relative">
+                  <Image
                     src={r?.coverImage ?? '/GreenCurry.png'}
                     alt={r?.name ?? fb.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    fill
+                    sizes="240px"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
 
@@ -342,10 +345,12 @@ export function PopularBlock({ isAdmin }: { isAdmin: boolean }) {
                   `}
                 >
                   <div className="h-[120px] w-full bg-gray-100 overflow-hidden relative">
-                    <img
+                    <Image
                       src={r.coverImage ?? '/nodata.png'}
                       alt={r.name ?? 'recipe'}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="460px"
+                      className="object-cover"
                     />
                     {active && (
                       <div className="absolute top-2 right-2 text-[11px] px-2 py-1 rounded-full bg-[#637402] text-white shadow">
