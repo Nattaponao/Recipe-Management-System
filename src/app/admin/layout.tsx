@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import jwt from 'jsonwebtoken';
 import { isAdminByEmail } from '@/lib/admin';
-import NavbarV2Server from '@/components/NavbarV2Server';
+import NavbarAuthClient from '@/components/NavbarAuthClient';
 import Footer from '@/components/footer';
 
 type JWTPayload = { email?: string };
@@ -38,7 +38,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#F9F7EB]">
-      <NavbarV2Server />
+      <NavbarAuthClient />
       {children}
       <Footer />
     </div>

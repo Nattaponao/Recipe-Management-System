@@ -1,7 +1,7 @@
 import Footer from '@/components/footer';
-import NavbarV2Server from '@/components/NavbarV2Server'; // ใช้ตัวเดียวกับ admin layout
 import OnlinePing from '@/components/OnlinePing';
 import NextTopLoader from 'nextjs-toploader';
+import NavbarAuthClient from '@/components/NavbarAuthClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,7 +23,7 @@ export default async function MainLayout({
     <>
       <NextTopLoader color="#637402" showSpinner={false} />
       <OnlinePing />
-      <NavbarV2Server />
+      <NavbarAuthClient />
       {children}
       <Footer />
     </>
