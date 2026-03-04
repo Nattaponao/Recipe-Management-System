@@ -8,6 +8,8 @@ import Footer from '@/components/footer';
 
 type JWTPayload = { email?: string };
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Khang Saeb | Dashboard',
 };
