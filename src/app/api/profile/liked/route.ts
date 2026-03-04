@@ -35,6 +35,7 @@ export async function GET() {
           coverImage: true,
           category: true,
           createdAt: true,
+          author: { select: { name: true } },
         },
       },
     },
