@@ -1,42 +1,47 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json()
+    const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json({ message: 'Missing fields' }, { status: 400 })
+      return NextResponse.json({ message: 'Missing fields' }, { status: 400 });
     }
 
-    const normalizedEmail = String(email).toLowerCase().trim()
+    const normalizedEmail = String(email).toLowerCase().trim();
 
     const existing = await prisma.user.findUnique({
       where: { email: normalizedEmail },
       select: { id: true },
-    })
+    });
 
     if (existing) {
-      return NextResponse.json({ message: 'Email already exists' }, { status: 409 })
+      return NextResponse.json(
+        { message: 'Email already exists' },
+        { status: 409 },
+      );
     }
 
-    const passwordHash = await bcrypt.hash(String(password), 10)
+    const passwordHash = await bcrypt.hash(String(password), 10);
 
     await prisma.user.create({
       data: {
         name: String(name),
         email: normalizedEmail,
-        password_hashed:passwordHash,
+        password_hashed: passwordHash,
+        image: '/userprofile.png',
       },
-    })
+    });
 
-    return NextResponse.json({ message: 'Register success' }, { status: 201 })
+    return NextResponse.json({ message: 'Register success' }, { status: 201 });
   } catch (err: any) {
-    console.error('REGISTER ERROR:', err)
+    console.error('REGISTER ERROR:', err);
     return NextResponse.json(
       { message: err?.message || 'Internal Server Error' },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }
