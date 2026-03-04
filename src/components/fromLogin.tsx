@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/rules-of-hooks */
 'use client';
 
 import Link from 'next/link';
@@ -7,15 +6,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-function isAdminEmailClient(email?: string | null) {
-  const list = (process.env.NEXT_PUBLIC_ADMIN_EMAILS ?? '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-
-  return !!email && list.includes(email.toLowerCase());
-}
 
 function FormLogin() {
   const [email, setEmail] = useState('');
@@ -37,29 +27,20 @@ function FormLogin() {
 
       setMessage(res.data?.message || 'Login Success!!');
 
-      const userEmail = res.data?.user?.email as string | undefined;
-      console.log(
-        'LOGIN EMAIL:',
-        userEmail,
-        'ADMIN?',
-        isAdminEmailClient(userEmail),
-      );
+      const role = res.data?.user?.role as string | undefined;
 
       // clear form
       setEmail('');
       setPassword('');
       (e.target as HTMLFormElement).reset();
 
-      // redirect based on admin email
-      if (isAdminEmailClient(userEmail)) {
+      // redirect by role from DB
+      if (role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push('/');
       }
     } catch (err: any) {
-      console.log('status:', err?.response?.status);
-      console.log('data:', err?.response?.data);
-      console.log('headers:', err?.response?.headers);
       setError(err?.response?.data?.message ?? 'Login failed');
     } finally {
       setLoading(false);
@@ -113,7 +94,7 @@ function FormLogin() {
               className="bg-[#637402] text-white w-85 py-1.5 rounded-2xl cursor-pointer transition-all hover:bg-[#505e01]"
               disabled={loading}
             >
-              {loading ? 'Logining...' : 'login'}
+              {loading ? 'Logging in...' : 'Login'}
             </button>
 
             <p className="font-extralight my-1.5 text-black">

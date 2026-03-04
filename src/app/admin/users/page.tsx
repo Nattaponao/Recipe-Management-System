@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import RoleSelect from '@/components/admin/RoleSelect';
 
@@ -24,7 +24,7 @@ async function requireAdmin() {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
     const email = String(payload?.email ?? '');
-    if (!isAdminEmail(email)) redirect('/');
+    if (!(await isAdminByEmail(email))) redirect('/');
     return { email };
   } catch {
     redirect('/login');
@@ -122,17 +122,25 @@ export default async function AdminUsersPage({ searchParams }: Props) {
 
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#DFD3A4]/40">
-                <tr className="text-left text-[#637402]">
-                  <th className="p-4 font-semibold">Name</th>
-                  <th className="p-4 font-semibold">Email</th>
-                  <th className="p-4 font-semibold">Role</th>
-                  <th className="p-4 font-semibold text-right">Action</th>
+              <thead>
+                <tr className="text-left text-[#637402] border-b-2 border-[#637402]/20">
+                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider text-right">
+                    Action
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-[#637402]/10">
-                {users.map((u) => (
+                {users.map((u: (typeof users)[number]) => (
                   <tr key={u.id} className="hover:bg-[#F9F7EB]">
                     <td className="p-4 text-[#637402] font-semibold">
                       {u.name ?? '-'}

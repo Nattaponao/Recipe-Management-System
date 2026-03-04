@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import LogoutButton from './LogoutButton';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 
 type NavItem = { label: string; href: string };
 
@@ -18,7 +18,7 @@ export default async function Footer() {
     isAuthed = true;
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      isAdmin = isAdminEmail(payload?.email);
+      isAdmin = await isAdminByEmail(payload?.email);
     } catch {
       isAuthed = false;
       isAdmin = false;

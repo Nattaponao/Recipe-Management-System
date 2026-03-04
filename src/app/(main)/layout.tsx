@@ -1,5 +1,5 @@
 import Footer from '@/components/footer';
-import NavbarServer from '@/components/NavbarServer';
+import NavbarV2Server from '@/components/NavbarV2Server'; // ใช้ตัวเดียวกับ admin layout
 import OnlinePing from '@/components/OnlinePing';
 import NextTopLoader from 'nextjs-toploader';
 
@@ -11,7 +11,7 @@ export const metadata = {
   },
 };
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ export default function MainLayout({
     <>
       <NextTopLoader color="#637402" showSpinner={false} />
       <OnlinePing />
-      <NavbarServer />
+      <NavbarV2Server />
       {children}
       <Footer />
     </>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 
 async function requireAdmin() {
   const cookieStore = await cookies();
@@ -17,7 +17,7 @@ async function requireAdmin() {
       email: string;
     };
     const email = String(payload.email ?? '');
-    if (!isAdminEmail(email))
+    if (!(await isAdminByEmail(email)))
       return { ok: false as const, status: 403, message: 'Forbidden' };
     return { ok: true as const };
   } catch {

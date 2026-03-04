@@ -3,7 +3,6 @@
 import { fredoka } from '@/lib/fonts';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import NavbarV2 from '@/components/navV2';
 
 interface Ingredient {
   id?: string;
@@ -149,7 +148,6 @@ export default function AdminEditRecipePage() {
 
   return (
     <div className={fredoka.className}>
-      <NavbarV2 />
       <div className="min-h-screen bg-[#F9F7EB] py-16 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-3xl p-12 shadow-md">

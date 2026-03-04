@@ -17,7 +17,13 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
-      select: { id: true, name: true, email: true, password_hashed: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password_hashed: true,
+        role: true,
+      },
     });
 
     if (!user?.password_hashed) {
@@ -53,7 +59,12 @@ export async function POST(req: Request) {
     const res = NextResponse.json(
       {
         message: 'Login success',
-        user: { id: user.id, name: user.name, email: user.email },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       },
       { status: 200 },
     );

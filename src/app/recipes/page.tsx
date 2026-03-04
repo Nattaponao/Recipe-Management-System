@@ -7,7 +7,7 @@ import SearchNoSSR from '@/components/SearchNoSSR';
 
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 
 export const metadata = {
   title: 'Khang Saeb | Recipes',
@@ -25,7 +25,7 @@ export default async function RecipesPage() {
   if (token) {
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      isAdmin = isAdminEmail(payload?.email);
+      isAdmin = await isAdminByEmail(payload?.email);
     } catch {}
   }
 

@@ -9,7 +9,7 @@ type HeroStore = {
   tag2: string;
   readTime: string;
   ctaText: string;
-  rightImageDataUrl?: string; // เก็บรูปที่อัปโหลดเป็น data url
+  rightImageDataUrl?: string;
 };
 
 const DEFAULT_STORE: HeroStore = {
@@ -57,7 +57,7 @@ async function saveToDB(s: HeroStore) {
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
-  return await new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(String(r.result || ''));
     r.onerror = reject;
@@ -65,71 +65,42 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-function Pencil({ show }: { show: boolean }) {
-  if (!show) return null;
-  return (
-    <span
-      className="absolute -top-2 -right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-full"
-      style={{ lineHeight: 1 }}
-    >
-      ✏️
-    </span>
-  );
-}
-
-/**
- * Inline editable text:
- * - admin: contentEditable + save on input (realtime)
- * - non-admin: plain text
- */
 function InlineText({
   isAdmin,
-  value,
+  initialValue,
   onChange,
   className,
 }: {
   isAdmin: boolean;
-  value: string;
+  initialValue: string;
   onChange: (v: string) => void;
   className?: string;
 }) {
-  const ref = useRef<HTMLSpanElement | null>(null);
-  const [hover, setHover] = useState(false);
+  const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (ref.current && ref.current.innerText !== value) {
-      ref.current.innerText = value;
+    if (spanRef.current && spanRef.current.innerText !== initialValue) {
+      spanRef.current.innerText = initialValue;
     }
-  }, [value]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (!isAdmin) {
-    return <span className={className}>{value}</span>;
-  }
+  if (!isAdmin) return <span className={className}>{initialValue}</span>;
 
   return (
     <span
-      className={`relative inline-block ${className ?? ''}`}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
-      <Pencil show={hover} />
-      <span
-        ref={ref}
-        contentEditable
-        suppressContentEditableWarning
-        className="outline-none rounded-md px-1 -mx-1 hover:bg-white/10 focus:bg-white/10 ring-1 ring-transparent hover:ring-white/25 focus:ring-white/35"
-        onInput={(e) =>
-          onChange((e.currentTarget as HTMLSpanElement).innerText)
+      ref={spanRef}
+      contentEditable
+      suppressContentEditableWarning
+      className={`outline-none rounded px-0.5 hover:bg-white/10 focus:bg-white/10 ${className ?? ''}`}
+      onInput={(e) => onChange((e.currentTarget as HTMLSpanElement).innerText)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          (e.currentTarget as HTMLSpanElement).blur();
         }
-        onKeyDown={(e) => {
-          // กัน Enter ไม่ให้ขึ้นบรรทัดใหม่ใน hero
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            (e.currentTarget as HTMLSpanElement).blur();
-          }
-        }}
-      />
-    </span>
+      }}
+    />
   );
 }
 
@@ -138,12 +109,10 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
   const [hoverImg, setHoverImg] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // useEffect โหลดข้อมูล
   useEffect(() => {
     loadFromDB().then(setData);
   }, []);
 
-  // patch function
   function patch(partial: Partial<HeroStore>) {
     setData((prev) => {
       const next = { ...prev, ...partial };
@@ -154,129 +123,123 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
 
   async function onPickImage(file?: File | null) {
     if (!file) return;
-    const dataUrl = await fileToDataUrl(file);
-    patch({ rightImageDataUrl: dataUrl });
+    patch({ rightImageDataUrl: await fileToDataUrl(file) });
   }
 
   const rightSrc = data.rightImageDataUrl?.startsWith('data:')
     ? data.rightImageDataUrl
-    : '/kapao.jpeg'; // คง UI เดิม: ถ้าไม่ได้อัปโหลด ใช้ไฟล์เดิม
+    : '/kapao.jpeg';
 
   return (
-    <div className={`bg-[#637402] pb-14`}>
-      <div className="flex flex-col md:flex-row justify-between items-center text-white">
-        <div className="pl-6 md:pl-19  w-full md:w-auto ">
-          <div
-            className={`text-[48px] font-semibold leading-tight md:text-[100px] md:leading-28 mb-8 md:mb-16 md:pt-10e `}
-          >
-            <h1>
-              <InlineText
-                isAdmin={isAdmin}
-                value={data.title1}
-                onChange={(v) =>
-                  patch({ title1: v.trim() || DEFAULT_STORE.title1 })
-                }
-              />
-            </h1>
-            <h1>
-              <InlineText
-                isAdmin={isAdmin}
-                value={data.title2}
-                onChange={(v) =>
-                  patch({ title2: v.trim() || DEFAULT_STORE.title2 })
-                }
-              />
-            </h1>
-          </div>
-
-          <hr className="opacity-65" />
-
-          <div className="font-extralight flex flex-col md:flex-row md:items-center mt-4 opacity-65 relative">
-            <div className="text-[12px] flex gap-4 pl-0 md:pl-16 mb-2 md:mb-0">
-              <button className="border rounded-2xl py-1.5 px-7">
+    /* ── Hero wrapper ── ห้ามสูงเกิน 500px และ overflow hidden */
+    <div className="bg-[#637402] h-[460px] md:h-[500px] overflow-hidden">
+      <div className="max-w-[1400px] mx-auto h-full">
+        {/* ── Grid 2 คอลัมน์: ซ้าย auto, ขวา 48% ── */}
+        <div className="h-full grid md:grid-cols-[1fr_48%] grid-cols-1 gap-5 p-5">
+          {/* ── LEFT: flex column, justify-between ทำให้ title บน / meta ล่าง ── */}
+          <div className="flex flex-col justify-between text-white pl-16 pr-10 pt-10 pb-8 min-w-0 overflow-hidden">
+            {/* Title */}
+            <div className="text-[52px] md:text-[68px] lg:text-[80px] font-bold leading-[1.05]">
+              <h1>
                 <InlineText
                   isAdmin={isAdmin}
-                  value={data.tag1}
+                  initialValue={data.title1}
                   onChange={(v) =>
-                    patch({ tag1: v.trim() || DEFAULT_STORE.tag1 })
+                    patch({ title1: v.trim() || DEFAULT_STORE.title1 })
                   }
                 />
-              </button>
-              <button className="border rounded-2xl py-1.5 px-7">
+              </h1>
+              <h1>
                 <InlineText
                   isAdmin={isAdmin}
-                  value={data.tag2}
+                  initialValue={data.title2}
                   onChange={(v) =>
-                    patch({ tag2: v.trim() || DEFAULT_STORE.tag2 })
+                    patch({ title2: v.trim() || DEFAULT_STORE.title2 })
+                  }
+                />
+              </h1>
+            </div>
+
+            {/* Bottom meta — hr + tags + CTA */}
+            <div className="shrink-0">
+              <div className="flex items-center gap-2 mb-4 text-white/65 text-[11px] font-light flex-wrap">
+                <button className="border border-white/40 rounded-full py-1 px-3 hover:bg-white/10 transition-colors">
+                  <InlineText
+                    isAdmin={isAdmin}
+                    initialValue={data.tag1}
+                    onChange={(v) =>
+                      patch({ tag1: v.trim() || DEFAULT_STORE.tag1 })
+                    }
+                  />
+                </button>
+                <button className="border border-white/40 rounded-full py-1 px-3 hover:bg-white/10 transition-colors">
+                  <InlineText
+                    isAdmin={isAdmin}
+                    initialValue={data.tag2}
+                    onChange={(v) =>
+                      patch({ tag2: v.trim() || DEFAULT_STORE.tag2 })
+                    }
+                  />
+                </button>
+                <span className="text-[12px]">
+                  <InlineText
+                    isAdmin={isAdmin}
+                    initialValue={data.readTime}
+                    onChange={(v) =>
+                      patch({ readTime: v.trim() || DEFAULT_STORE.readTime })
+                    }
+                  />
+                </span>
+              </div>
+
+              <button className="bg-[#1C1C1E] text-[#DFD3A4] py-2 px-7 rounded-full text-[14px] font-medium hover:bg-[#2c2c2e] transition-colors cursor-pointer tracking-wide">
+                <InlineText
+                  isAdmin={isAdmin}
+                  initialValue={data.ctaText}
+                  onChange={(v) =>
+                    patch({ ctaText: v.trim() || DEFAULT_STORE.ctaText })
                   }
                 />
               </button>
             </div>
-            <p className="text-[14px] md:absolute md:right-0">
-              <InlineText
-                isAdmin={isAdmin}
-                value={data.readTime}
-                onChange={(v) =>
-                  patch({ readTime: v.trim() || DEFAULT_STORE.readTime })
-                }
-              />
-            </p>
           </div>
 
-          <div className="text-[#DFD3A4] font-extralight pl-0 md:pl-16">
-            <button className="bg-[#1C1C1E] py-2 px-6 rounded-3xl mt-9 text-[16px] md:text-[18px] cursor-pointer">
-              <InlineText
-                isAdmin={isAdmin}
-                value={data.ctaText}
-                onChange={(v) =>
-                  patch({ ctaText: v.trim() || DEFAULT_STORE.ctaText })
-                }
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* รูปขวา: admin hover ขึ้นดินสอ และคลิกเพื่ออัปโหลด */}
-        <div className="mt-10 md:mt-0 w-full md:w-auto flex justify-center relative">
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => onPickImage(e.target.files?.[0])}
-          />
-
-          {isAdmin && (
-            <div
-              className="absolute top-3 right-8 z-10"
-              style={{ pointerEvents: 'none' }}
-            >
-              <Pencil show={hoverImg} />
-            </div>
-          )}
-
+          {/* ── RIGHT: รูปภาพ rounded ── */}
           <div
+            className="relative rounded-[20px] overflow-hidden h-full"
             onMouseEnter={() => isAdmin && setHoverImg(true)}
             onMouseLeave={() => isAdmin && setHoverImg(false)}
             onClick={() => isAdmin && fileRef.current?.click()}
-            className={isAdmin ? 'cursor-pointer' : ''}
-            title={isAdmin ? 'คลิกเพื่ออัปโหลดรูปใหม่' : undefined}
           >
-            {/* ถ้าเป็น data url ใช้ img เพื่อไม่ต้องตั้ง next.config */}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => onPickImage(e.target.files?.[0])}
+            />
+
+            {isAdmin && hoverImg && (
+              <div className="absolute top-3 right-3 z-10 bg-black/70 text-white text-[11px] px-3 py-1.5 rounded-full cursor-pointer">
+                ✏️ เปลี่ยนรูป
+              </div>
+            )}
+
             {rightSrc.startsWith('data:') ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={rightSrc}
                 alt="kapao"
-                className="w-[90%] md:w-[800px] h-auto "
+                className="w-full h-full object-cover object-center"
               />
             ) : (
               <Image
                 src={rightSrc}
                 alt="kapao"
-                width={800}
-                height={800}
-                className="w-[90%] md:w-[800px] h-auto "
+                fill
+                className="object-cover object-center"
+                sizes="48vw"
+                priority
               />
             )}
           </div>

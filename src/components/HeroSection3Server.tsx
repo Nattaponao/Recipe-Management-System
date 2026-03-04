@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import HeroSection3 from '@/components/HeroSection3';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 
 export default async function HeroSection3Server() {
   const cookieStore = await cookies();
@@ -13,7 +13,7 @@ export default async function HeroSection3Server() {
   if (token) {
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      isAdmin = isAdminEmail(payload?.email);
+      isAdmin = await isAdminByEmail(payload?.email);
     } catch {
       isAdmin = false;
     }

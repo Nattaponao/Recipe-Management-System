@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { fredoka } from '@/lib/fonts';
 
 type NavItem = { label: string; href: string };
 
 export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   const userMenu: NavItem[] = [
     { label: 'Home', href: '/' },
@@ -17,17 +20,28 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
 
   const adminMenu: NavItem[] = [
     { label: 'Home', href: '/' },
-    { label: 'Recipes', href: '/recipes' },
+    { label: 'Recipes', href: '/admin/recipes' },
     { label: 'Dashboard', href: '/admin' },
     { label: 'Users', href: '/admin/users' },
   ];
 
   const menu = isAdmin ? adminMenu : userMenu;
 
+  // user: สีเขียวแค่ / และ /ai
+  const userGreenPages = ['/', '/ai'];
+  const isGreen = isAdmin
+    ? pathname === '/' // admin: เขียวแค่ /
+    : userGreenPages.includes(pathname); // user: เขียวแค่ / และ /ai
+
+  const bg = isGreen ? 'bg-[#637402]' : 'bg-[#F9F7EB]';
+  const textColor = isGreen ? 'text-white' : 'text-[#637402]';
+  const underlineColor = isGreen ? 'after:bg-white' : 'after:bg-[#637402]';
+  const strokeColor = isGreen ? 'white' : '#637402';
+
   return (
-    <div className="bg-[#F9F7EB]">
+    <div className={`${bg} ${fredoka.className}`}>
       <nav className="container mx-auto">
-        <div className="flex justify-between items-center py-4 text-[#637402]">
+        <div className={`flex justify-between items-center py-4 ${textColor}`}>
           <div className="font-semibold text-[32px] md:text-[48px]">
             Khang Saeb
           </div>
@@ -38,7 +52,7 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
                 <li key={item.label} className="ml-12 text-[24px]">
                   <Link
                     href={item.href}
-                    className="relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-[#637402] after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100"
+                    className={`relative inline-block cursor-pointer after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full ${underlineColor} after:scale-x-0 after:origin-center after:transition-transform after:duration-300 hover:after:scale-x-100`}
                   >
                     {item.label}
                   </Link>
@@ -49,7 +63,7 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
 
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center p-2"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-white/10 transition-colors"
             aria-label="Open menu"
             aria-expanded={open}
             onClick={() => setOpen(!open)}
@@ -57,7 +71,7 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
               <path
                 d="M4 6h16M4 12h16M4 18h16"
-                stroke="#637402"
+                stroke={strokeColor}
                 strokeWidth="2"
                 strokeLinecap="round"
               />
@@ -66,7 +80,7 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
         </div>
 
         <div className={`md:hidden ${open ? 'block' : 'hidden'} pb-4`}>
-          <ul className="flex flex-col text-[#637402] font-semibold gap-3">
+          <ul className={`flex flex-col font-semibold gap-3 ${textColor}`}>
             {menu.map((item) => (
               <li key={item.label} className="text-[18px]">
                 <Link href={item.href} onClick={() => setOpen(false)}>

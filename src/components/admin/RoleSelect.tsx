@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { updateUserRoleAction } from '@/app/(main)/admin/users/actions';
+import { updateUserRoleAction } from '@/app/admin/users/actions';
 
 export default function RoleToggle({
   id,

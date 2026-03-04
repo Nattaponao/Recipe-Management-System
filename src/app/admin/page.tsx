@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 import AdminDashboardClientCharts from './AdminDashboardClientCharts';
 import TopRecipesWidget from './TopRecipesWidget';
 
@@ -36,7 +36,7 @@ export default async function AdminDashboardPage() {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
     adminEmail = String(payload?.email ?? '');
-    if (!isAdminEmail(adminEmail)) redirect('/');
+    if (!(await isAdminByEmail(adminEmail))) redirect('/');
   } catch {
     redirect('/login');
   }

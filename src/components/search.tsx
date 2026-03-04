@@ -59,10 +59,7 @@ export default function SearchRecipeClient({
   const filteredLocal = useMemo(() => {
     const q = normalize(query);
     return initialRecipes.filter((r) => {
-      const okQ =
-        !q ||
-        normalize(r.name ?? '').includes(q) ||
-        normalize(r.description ?? '').includes(q);
+      const okQ = !q || normalize(r.name ?? '').includes(q);
 
       const okCat =
         !category || normalize(r.category ?? '') === normalize(category);
@@ -209,7 +206,7 @@ export default function SearchRecipeClient({
               setCountry('');
               setRecipes(initialRecipes);
             }}
-            className="text-[#637402] font-semibold hover:underline"
+            className="text-[#637402] font-semibold hover:underline cursor-pointer"
           >
             Reset
           </button>

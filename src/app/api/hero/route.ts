@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminByEmail } from '@/lib/admin';
 
 // GET - ดึงข้อมูล hero
 export async function GET() {
@@ -25,7 +25,7 @@ export async function PUT(req: Request) {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
       email: string;
     };
-    if (!isAdminEmail(payload.email))
+    if (!(await isAdminByEmail(payload.email)))
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   } catch {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

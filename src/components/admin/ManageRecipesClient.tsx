@@ -39,10 +39,7 @@ export default function ManageRecipesClient({
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     return initialRecipes.filter((r) => {
-      const okQ =
-        !query ||
-        (r.name ?? '').toLowerCase().includes(query) ||
-        (r.description ?? '').toLowerCase().includes(query);
+      const okQ = !query || (r.name ?? '').toLowerCase().includes(query);
 
       const okCat = !category || (r.category ?? '') === category;
       const okCountry = !country || (r.country ?? '') === country;
@@ -70,22 +67,20 @@ export default function ManageRecipesClient({
   }, [openMenuId]);
 
   async function handleDelete(id: string) {
-    const ok = confirm('ลบสูตรนี้เลยไหม?');
-    if (!ok) return;
-
+    if (!confirm('ลบสูตรนี้เลยไหม?')) return;
     const res = await fetch(`/api/admin/recipes/${id}`, { method: 'DELETE' });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       alert(j?.message || 'ลบไม่สำเร็จ');
       return;
     }
-
     router.refresh();
   }
 
   return (
     <div className="min-h-screen bg-[#F9F7EB]">
       <div className="container mx-auto px-4 py-10">
+        {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
             <h1 className="text-[#637402] text-4xl md:text-5xl font-semibold">
@@ -93,7 +88,6 @@ export default function ManageRecipesClient({
             </h1>
             <p className="text-[#637402]/70 mt-2">จัดการสูตรอาหารทั้งหมด</p>
           </div>
-
           <button
             type="button"
             onClick={() => router.push('/admin/recipes/new')}
@@ -112,7 +106,6 @@ export default function ManageRecipesClient({
               placeholder="ค้นหา (ชื่อ/คำอธิบาย)..."
               className="w-full rounded-2xl border border-[#637402]/20 px-4 py-2 outline-none text-gray-400"
             />
-
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -125,7 +118,6 @@ export default function ManageRecipesClient({
                 </option>
               ))}
             </select>
-
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
@@ -138,7 +130,6 @@ export default function ManageRecipesClient({
                 </option>
               ))}
             </select>
-
             <div className="flex items-center justify-between md:justify-end gap-3">
               <div className="text-[#637402] font-semibold">
                 {filtered.length} items
@@ -158,9 +149,10 @@ export default function ManageRecipesClient({
           </div>
         </div>
 
-        {/* List */}
-        <div className="mt-6 bg-white rounded-3xl border border-[#637402]/20 shadow-sm overflow-visible">
-          <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3 text-[#637402]/70 font-semibold text-sm border-b border-[#637402]/10">
+        {/* Table */}
+        <div className="mt-6 bg-white rounded-3xl border border-[#637402]/20 shadow-sm overflow-hidden">
+          {/* Header */}
+          <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3 text-[#637402] font-semibold text-sm uppercase tracking-wider border-b-2 border-[#637402]/20">
             <div className="col-span-5">Recipe</div>
             <div className="col-span-2">Category</div>
             <div className="col-span-2">Country</div>
@@ -168,10 +160,11 @@ export default function ManageRecipesClient({
             <div className="col-span-1 text-right">Action</div>
           </div>
 
+          {/* Rows */}
           {filtered.map((r) => (
             <div
               key={r.id}
-              className="relative grid grid-cols-1 md:grid-cols-12 gap-3 px-5 py-4 border-b border-[#637402]/10 items-start md:items-center"
+              className="grid grid-cols-1 md:grid-cols-12 gap-3 px-5 py-4 border-b border-[#637402]/10 items-start md:items-center hover:bg-[#F9F7EB]"
             >
               <div className="md:col-span-5">
                 <div className="flex items-center gap-3">
@@ -192,7 +185,6 @@ export default function ManageRecipesClient({
                   </div>
                 </div>
               </div>
-
               <div className="md:col-span-2 text-[#637402]/80">
                 {r.category ?? '-'}
               </div>
@@ -203,7 +195,7 @@ export default function ManageRecipesClient({
                 {toDateText(r.createdAt)}
               </div>
 
-              {/* 3-dots menu */}
+              {/* 3-dots menu — ใช้ fixed position เพื่อไม่ให้ถูกตัดโดย overflow:hidden */}
               <div className="md:col-span-1 flex md:justify-end">
                 <div className="relative">
                   <button
@@ -216,22 +208,21 @@ export default function ManageRecipesClient({
                   >
                     ⋯
                   </button>
-
                   {openMenuId === r.id && (
-                    <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-[#637402]/20 bg-white shadow-lg overflow-hidden z-50">
+                    <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-[#637402]/20 bg-white shadow-lg z-[100]">
                       <button
                         type="button"
                         onClick={() =>
                           router.push(`/admin/recipes/${r.id}/edit`)
                         }
-                        className="w-full text-left px-4 py-2 hover:bg-[#DFD3A4]/30 text-[#637402] cursor-pointer"
+                        className="w-full text-left px-4 py-2 hover:bg-[#DFD3A4]/30 text-[#637402] cursor-pointer rounded-t-2xl"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(r.id)}
-                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer"
+                        className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 cursor-pointer rounded-b-2xl"
                       >
                         Delete
                       </button>
