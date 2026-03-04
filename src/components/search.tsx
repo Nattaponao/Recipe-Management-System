@@ -97,7 +97,6 @@ export default function SearchRecipeClient({
         <h1 className="text-[105px] font-semibold text-[#637402]">Recipes</h1>
 
         <div className="relative flex items-center gap-2">
-          {/* ✅ เพิ่ม <label> ให้ input เพื่อแก้ Accessibility */}
           <label htmlFor="search" className="sr-only">
             ค้นหาเมนู
           </label>
@@ -136,7 +135,6 @@ export default function SearchRecipeClient({
         </div>
 
         <div className="flex gap-7 mt-5 items-center">
-          {/* ✅ เพิ่ม <label> ให้ select ทุกตัว เพื่อแก้ Accessibility */}
           <div className="flex items-center relative w-90">
             <label htmlFor="category-filter" className="sr-only">
               กรองตามหมวดหมู่
@@ -220,7 +218,6 @@ export default function SearchRecipeClient({
             Reset
           </button>
 
-          {/* ✅ เพิ่ม aria-label ให้ Link ที่ไม่มีข้อความ แก้ "Links do not have a discernible name" */}
           {isAdmin && (
             <div>
               <Link href="/recipes/new" aria-label="เพิ่มสูตรอาหารใหม่">
@@ -277,7 +274,6 @@ export default function SearchRecipeClient({
                     aria-label={`ดูสูตร ${r.name}`}
                   >
                     <div className="text-black rounded-2xl bg-[#FEFEF6] overflow-hidden group flex flex-col h-full hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300">
-                      {/* ✅ เปลี่ยนจาก <img> เป็น <Image> + กำหนด width/height ตายตัว แก้ CLS + Image delivery */}
                       <div className="relative h-48 overflow-hidden">
                         <Image
                           src={
@@ -288,7 +284,6 @@ export default function SearchRecipeClient({
                           fill
                           sizes="(max-width: 768px) 50vw, 25vw"
                           className="object-cover transition-transform duration-300 ease-out group-hover:scale-110"
-                          // ✅ priority เฉพาะ 4 รูปแรก แก้ LCP
                           priority={index < 4}
                           loading={index < 4 ? undefined : 'lazy'}
                         />
@@ -298,11 +293,13 @@ export default function SearchRecipeClient({
                         <h2 className="font-semibold text-black text-[16px] line-clamp-1">
                           {r.name}
                         </h2>
-                        <p className="text-sm text-gray-400 line-clamp-2">
+
+                        <p className="text-sm text-gray-400 line-clamp-2 flex-1">
                           {r.description}
                         </p>
+
                         {r.category && (
-                          <span className="text-xs font-semibold px-3 py-1 rounded-full border border-[#637402]/30 text-[#637402] self-start mt-1">
+                          <span className="text-xs font-semibold px-3 py-1 rounded-full border border-[#637402]/30 text-[#637402] self-start mt-auto">
                             {r.category}
                           </span>
                         )}
