@@ -4,6 +4,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    function stripBase64(url: string | null) {
+      if (!url) return null;
+      if (url.startsWith('data:')) return null;
+      return url;
+    }
     const overrides = await prisma.popular_cards.findMany({
       include: {
         recipe: {
@@ -51,7 +56,11 @@ export async function GET() {
       return {
         slot,
         recipe: recipe
-          ? { ...recipe, likesCount: recipe._count?.recipe_likes ?? 0 }
+          ? {
+              ...recipe,
+              coverImage: stripBase64(recipe.coverImage),
+              likesCount: recipe._count?.recipe_likes ?? 0,
+            }
           : null,
       };
     });

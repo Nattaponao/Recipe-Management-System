@@ -19,8 +19,12 @@ export async function GET(req: Request) {
       description: true,
     },
   });
+  const safe = recipes.map((r) => ({
+    ...r,
+    coverImage: r.coverImage?.startsWith('data:') ? null : r.coverImage,
+  }));
 
-  return NextResponse.json(recipes);
+  return NextResponse.json(safe);
 }
 
 // POST /api/recipes

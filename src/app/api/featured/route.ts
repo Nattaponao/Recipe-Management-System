@@ -4,6 +4,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    function stripBase64(url: string | null) {
+      if (!url) return null;
+      if (url.startsWith('data:')) return null;
+      return url;
+    }
     const rows = await prisma.featured_cards.findMany({
       include: {
         recipe: {
@@ -60,7 +65,11 @@ export async function GET() {
 
     const out = [1, 2, 3, 4].map((s) => {
       const r = bySlot.get(s);
-      return r ? { slot: r.slot, recipe: r.recipe } : fallback(s);
+      if (!r) return fallback(s);
+      return {
+        slot: r.slot,
+        recipe: { ...r.recipe, coverImage: stripBase64(r.recipe.coverImage) },
+      };
     });
 
     return NextResponse.json({ slots: out });
