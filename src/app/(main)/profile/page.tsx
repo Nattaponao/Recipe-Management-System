@@ -95,7 +95,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F9F7EB] gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <Image src="/loading.gif" alt="loading" width={128} height={128} />
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#637402] border-t-transparent" />
         <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
       </div>
     );

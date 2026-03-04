@@ -1,11 +1,9 @@
-import Image from 'next/image';
-
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#F9F7EB]">
       <div className="flex flex-col items-center gap-4">
-        <Image src="/loading.gif" alt="loading" width={128} height={128} />
-        <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#637402] border-t-transparent" />
+        <p className="text-[#637402] font-semibold">กำลังโหลด...</p>
       </div>
     </div>
   );
