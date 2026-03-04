@@ -57,15 +57,6 @@ async function saveToDB(s: HeroStore) {
   });
 }
 
-async function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result || ''));
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-
 function InlineText({
   isAdmin,
   initialValue,
@@ -110,8 +101,13 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
   const [hoverImg, setHoverImg] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
-    loadFromDB().then(setData);
+    loadFromDB().then((d) => {
+      setData(d);
+      setLoaded(true);
+    });
   }, []);
 
   function patch(partial: Partial<HeroStore>) {
@@ -222,7 +218,7 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
 
           {/* ── RIGHT: รูปภาพ rounded ── */}
           <div
-            className="relative rounded-[20px] overflow-hidden h-full"
+            className="relative rounded-[20px] overflow-hidden h-full bg-[#4a5a02]"
             onMouseEnter={() => isAdmin && setHoverImg(true)}
             onMouseLeave={() => isAdmin && setHoverImg(false)}
             onClick={() => isAdmin && fileRef.current?.click()}
@@ -241,20 +237,10 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
               </div>
             )}
 
-            {rightSrc.startsWith('data:') ? (
-              // eslint-disable-next-line @next/next/no-img-element
+            {loaded && (
               <Image
                 src={rightSrc}
-                alt="kapao"
-                fill
-                className="object-cover object-center"
-                sizes="48vw"
-                priority
-              />
-            ) : (
-              <Image
-                src={rightSrc}
-                alt="kapao"
+                alt={data.title1 ?? 'hero image'}
                 fill
                 className="object-cover object-center"
                 sizes="48vw"
