@@ -6,12 +6,20 @@ import { isAdminByEmail } from '@/lib/admin';
 
 // GET - ดึงข้อมูล hero
 export async function GET() {
-  const settings = await prisma.hero_settings.upsert({
-    where: { id: 1 },
-    update: {},
-    create: { id: 1 },
-  });
-  return NextResponse.json(settings);
+  try {
+    const settings = await prisma.hero_settings.upsert({
+      where: { id: 1 },
+      update: {},
+      create: { id: 1 },
+    });
+    return NextResponse.json(settings);
+  } catch (err) {
+    console.error('[hero GET]', err);
+    return NextResponse.json(
+      { message: 'Internal Server Error' },
+      { status: 500 },
+    );
+  }
 }
 
 // PUT - admin อัปเดต

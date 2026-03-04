@@ -13,8 +13,8 @@ model User {
   name            String?
   password_hashed String?
   role            String         @default("USER")
-  image           String?
   lastSeen        DateTime?      @db.Timestamptz(6)
+  image           String?
   posts           Post[]
   recipe_likes    recipe_likes[]
   recipeSaves     recipe_saves[]
