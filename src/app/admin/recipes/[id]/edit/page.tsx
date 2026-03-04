@@ -74,12 +74,22 @@ export default function AdminEditRecipePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setCoverImage(reader.result as string);
-    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data.url) {
+      setCoverImage(data.url);
+    }
   };
 
   const addIngredient = () =>

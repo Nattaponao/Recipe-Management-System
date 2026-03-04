@@ -33,12 +33,22 @@ export default function EditProfileModal({ user, onClose, onUpdated }: Props) {
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setImage(reader.result as string);
-    reader.readAsDataURL(file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data.url) {
+      setImage(data.url);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

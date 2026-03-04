@@ -29,6 +29,7 @@ export default function EditRecipePage() {
     { name: '', amount: '', unit: '' },
   ]);
   const [steps, setSteps] = useState<string[]>(['']);
+  const [uploading, setUploading] = useState(false);
 
   const FOOD_TYPES = [
     'curry',
@@ -76,12 +77,27 @@ export default function EditRecipePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setCoverImage(reader.result as string);
-    reader.readAsDataURL(file);
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        setCoverImage(data.url);
+      }
+    } finally {
+      setUploading(false);
+    }
   };
 
   const addIngredient = () =>
@@ -391,7 +407,7 @@ export default function EditRecipePage() {
                 </div>
                 <div className="flex justify-center">
                   <label className="cursor-pointer border-2 border-[#6B8E23] text-[#6B8E23] rounded-full px-8 py-2 text-sm font-semibold hover:bg-[#6B8E23] hover:text-white transition">
-                    Upload picture
+                    {uploading ? 'กำลัง upload...' : 'Upload picture'}
                     <input
                       type="file"
                       accept="image/*"
