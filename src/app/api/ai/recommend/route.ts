@@ -87,8 +87,15 @@ export async function POST(req: NextRequest) {
     const TOP_N = 10;
 
     const topRecipes = recipes.filter((r) =>
-      scored.slice(0, TOP_N).some((s) => s.recipeId === r.id),
+      scored
+        .filter((s) => s.matchScore > 0)
+        .slice(0, TOP_N)
+        .some((s) => s.recipeId === r.id),
     );
+
+    if (topRecipes.length === 0) {
+      return NextResponse.json([]);
+    }
 
     let analyzed: AIAnalyzeResult[];
 
