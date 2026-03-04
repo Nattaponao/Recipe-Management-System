@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     if (scored.length > 0 && scored[0].matchScore >= 70) {
       console.log('⚡ use DB scoring (skip AI)');
-      const top5 = scored.slice(0, 5);
+      const top5 = scored.filter((r) => r.matchScore > 0).slice(0, 5);
       const result = mergeImage(top5);
 
       await prisma.ai_cache.upsert({
@@ -97,13 +97,16 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       console.warn('⚠️ AI unavailable → fallback to DB scoring');
 
-      analyzed = scored.slice(0, 5).map((r) => ({
-        recipeId: r.recipeId,
-        recipeName: r.recipeName ?? 'ไม่ทราบชื่อเมนู',
-        matchScore: r.matchScore,
-        missingIngredients: r.missingIngredients,
-        reason: 'แนะนำจากฐานข้อมูล',
-      }));
+      analyzed = scored
+        .filter((r) => r.matchScore > 0)
+        .slice(0, 5)
+        .map((r) => ({
+          recipeId: r.recipeId,
+          recipeName: r.recipeName ?? 'ไม่ทราบชื่อเมนู',
+          matchScore: r.matchScore,
+          missingIngredients: r.missingIngredients,
+          reason: 'แนะนำจากฐานข้อมูล',
+        }));
     }
 
     const finalResult = mergeImage(analyzed);
