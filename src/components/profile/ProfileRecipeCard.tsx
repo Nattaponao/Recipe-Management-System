@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type Props = {
   id: string;
@@ -31,7 +32,6 @@ export default function ProfileRecipeCard({
   const [deleting, setDeleting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // ปิด menu เมื่อคลิกข้างนอก
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -60,20 +60,19 @@ export default function ProfileRecipeCard({
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-50">
-      {/* รูปภาพ */}
       <div className="relative h-48 w-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={image || '/GreenCurry.png'}
           alt={title}
-          className="w-full h-full object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
         />
         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-[#637402]">
           {category || 'ทั่วไป'}
         </div>
       </div>
 
-      {/* รายละเอียด */}
       <div className="p-5 space-y-3">
         <h3 className="text-xl font-bold text-[#637402] line-clamp-1">
           {title || 'ชื่อสูตรอาหาร'}
@@ -81,12 +80,13 @@ export default function ProfileRecipeCard({
 
         <div className="flex items-center justify-between pt-2 border-t border-gray-50">
           <div className="flex items-center gap-2">
-            <div className="relative w-6 h-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="relative w-6 h-6 shrink-0">
+              <Image
                 src={avatar || '/profilemen.jpg'}
-                alt="author"
-                className="w-6 h-6 rounded-full object-cover"
+                alt={`รูปโปรไฟล์ ${author}`}
+                fill
+                sizes="24px"
+                className="rounded-full object-cover"
               />
             </div>
             <span className="text-sm text-gray-600 font-medium">{author}</span>
@@ -94,7 +94,6 @@ export default function ProfileRecipeCard({
           <div className="flex items-center gap-2">
             {!onEdit && <span className="text-xs text-gray-400">{date}</span>}
 
-            {/* ... menu */}
             {showMenu && (
               <div className="relative" ref={menuRef}>
                 <button

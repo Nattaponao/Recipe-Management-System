@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface Recipe {
   id: string;
@@ -16,6 +17,33 @@ interface UserProfile {
   name: string | null;
   image: string | null;
   recipes: Recipe[];
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="bg-[#F9F7EB] min-h-screen pb-20">
+      <main className="container mx-auto px-4 pt-10">
+        <div className="max-w-3xl mx-auto space-y-6">
+          {/* Profile card skeleton */}
+          <div className="bg-white rounded-[2rem] shadow-xl p-8 flex flex-col items-center gap-4">
+            <div className="w-32 h-32 rounded-full bg-[#637402]/10 animate-pulse" />
+            <div className="h-8 w-48 rounded-lg bg-[#637402]/10 animate-pulse" />
+            <div className="h-4 w-32 rounded-lg bg-gray-100 animate-pulse" />
+          </div>
+          {/* Recipe grid skeleton — ความสูงตรงกับ grid จริง กัน CLS */}
+          <div className="h-8 w-32 rounded-lg bg-[#637402]/10 animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-3xl overflow-hidden shadow-md h-[280px] animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export default function UserProfilePage() {
@@ -40,14 +68,7 @@ export default function UserProfilePage() {
     });
   };
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F7EB]">
-        <div className="text-[#637402] text-xl font-bold animate-bounce">
-          กำลังโหลด...
-        </div>
-      </div>
-    );
+  if (loading) return <ProfileSkeleton />;
 
   if (!profile)
     return (
@@ -62,12 +83,16 @@ export default function UserProfilePage() {
         <div className="max-w-3xl mx-auto space-y-6">
           {/* Profile Card */}
           <div className="bg-white rounded-[2rem] shadow-xl p-8 flex flex-col items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={profile.image || '/userprofile.png'}
-              alt="avatar"
-              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-            />
+            <div className="relative w-32 h-32">
+              <Image
+                src={profile.image || '/userprofile.png'}
+                alt={`รูปโปรไฟล์ ${profile.name}`}
+                fill
+                sizes="128px"
+                className="rounded-full object-cover border-4 border-white shadow-lg"
+                priority
+              />
+            </div>
             <h1 className="text-3xl font-bold text-[#637402] mt-4">
               {profile.name}
             </h1>
@@ -87,18 +112,23 @@ export default function UserProfilePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {profile.recipes.map((recipe) => (
+              {profile.recipes.map((recipe, index) => (
                 <div
                   key={recipe.id}
                   className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition cursor-pointer hover:translate-y-[-5px] duration-300"
                   onClick={() => router.push(`/recipes/${recipe.id}`)}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={recipe.coverImage || '/userprofile.png'}
-                    alt={recipe.name ?? ''}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="relative h-48 w-full">
+                    <Image
+                      src={recipe.coverImage || '/userprofile.png'}
+                      alt={recipe.name ?? 'สูตรอาหาร'}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                      priority={index < 2}
+                      loading={index < 2 ? undefined : 'lazy'}
+                    />
+                  </div>
                   <div className="p-5">
                     <div className="inline-block bg-white/90 border border-[#637402]/20 px-3 py-1 rounded-full text-xs font-bold text-[#637402] mb-2">
                       {recipe.category || 'ทั่วไป'}
