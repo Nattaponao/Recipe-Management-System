@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import LogoutButton from './LogoutButton';
 import { isAdminByEmail } from '@/lib/admin';
+import FooterAuthButton from './FooterAuthButton';
 
 type NavItem = { label: string; href: string };
 
@@ -74,16 +75,7 @@ export default async function Footer() {
                 Join us in a world of delicious flavors.
               </h1>
 
-              {!isAuthed ? (
-                <Link
-                  href="/login"
-                  className="inline-block bg-black text-[#E4D7AA] font-extralight text-[14px] md:text-[16px] py-2 px-5 mt-5 mb-3 rounded-3xl"
-                >
-                  Login Now!
-                </Link>
-              ) : (
-                <LogoutButton />
-              )}
+              <FooterAuthButton />
             </div>
           </div>
         </div>
