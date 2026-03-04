@@ -124,12 +124,22 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
 
   async function onPickImage(file?: File | null) {
     if (!file) return;
-    patch({ rightImageDataUrl: await fileToDataUrl(file) });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data.url) {
+      patch({ rightImageDataUrl: data.url });
+    }
   }
 
-  const rightSrc = data.rightImageDataUrl?.startsWith('data:')
-    ? data.rightImageDataUrl
-    : '/kapao.jpeg';
+  const rightSrc = data.rightImageDataUrl || '/kapao.jpeg';
 
   return (
     /* ── Hero wrapper ── ห้ามสูงเกิน 500px และ overflow hidden */
@@ -233,10 +243,13 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
 
             {rightSrc.startsWith('data:') ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={rightSrc}
                 alt="kapao"
-                className="w-full h-full object-cover object-center"
+                fill
+                className="object-cover object-center"
+                sizes="48vw"
+                priority
               />
             ) : (
               <Image
