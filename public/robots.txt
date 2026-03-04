@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://khangsaeb-ol2f6r7ps-nattapon-aonsris-projects.vercel.app/sitemap.xml
