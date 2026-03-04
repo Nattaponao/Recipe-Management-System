@@ -353,6 +353,7 @@ export default function RecipeOfWeek({
         <Image
           src={recipe.coverImage ?? '/nodata.png'}
           alt={recipe.name ?? 'Recipe'}
+          sizes="275px"
           fill
           className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
         />
@@ -402,6 +403,7 @@ export default function RecipeOfWeek({
                       src={left.coverImage ?? '/nodata.png'}
                       alt={left.name ?? 'Recipe'}
                       fill
+                      sizes="520px"
                       className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                     />
                   </div>
