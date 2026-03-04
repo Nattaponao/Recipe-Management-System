@@ -36,7 +36,7 @@ export default async function Footer() {
 
   const adminMenu: NavItem[] = [
     { label: 'Home', href: '/' },
-    { label: 'Recipes', href: 'admin/recipes' },
+    { label: 'Recipes', href: '/admin/recipes' },
     { label: 'Dashboard', href: '/admin' },
     { label: 'Users', href: '/admin/users' },
   ];
