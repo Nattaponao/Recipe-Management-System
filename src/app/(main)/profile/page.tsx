@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
+import Image from 'next/image';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -94,7 +95,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F9F7EB] gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/loading.gif" alt="loading" className="w-32 h-32" />
+        <Image src="/loading.gif" alt="loading" width={128} height={128} />
         <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
       </div>
     );
