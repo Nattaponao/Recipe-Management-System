@@ -11,6 +11,14 @@ import { isAdminByEmail } from '@/lib/admin';
 
 export const metadata = {
   title: 'Khang Saeb | Recipes',
+  description:
+    'ค้นหาสูตรอาหารไทยและนานาชาติ กว่า 100 เมนู พร้อมวิธีทำและวัตถุดิบครบครัน',
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: 'Khang Saeb | Recipes',
+    description: 'ค้นหาสูตรอาหารไทยและนานาชาติ กว่า 100 เมนู',
+    type: 'website',
+  },
 };
 
 export default async function RecipesPage() {

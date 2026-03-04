@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import Image from 'next/image';
@@ -27,7 +25,7 @@ export default function SearchRecipeClient({
   isAdmin?: boolean;
 }) {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState(''); // เก็บค่าตรง DB
+  const [category, setCategory] = useState('');
   const [country, setCountry] = useState('');
 
   const [mounted, setMounted] = useState(false);
@@ -36,9 +34,6 @@ export default function SearchRecipeClient({
   const [recipes, setRecipes] = useState<RecipeCard[]>(initialRecipes);
   const [loading, setLoading] = useState(false);
 
-  const safeRecipes = Array.isArray(recipes) ? recipes : [];
-
-  // ✅ option จากข้อมูลจริง (initial)
   const categories = useMemo(() => {
     const set = new Set<string>();
     (Array.isArray(initialRecipes) ? initialRecipes : []).forEach((r) => {
@@ -55,17 +50,14 @@ export default function SearchRecipeClient({
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [initialRecipes]);
 
-  // ✅ client-side filter (กันกรณี API ไม่กรอง/ค่าไม่ match)
   const filteredLocal = useMemo(() => {
     const q = normalize(query);
     return initialRecipes.filter((r) => {
       const okQ = !q || normalize(r.name ?? '').includes(q);
-
       const okCat =
         !category || normalize(r.category ?? '') === normalize(category);
       const okCountry =
         !country || normalize(r.country ?? '') === normalize(country);
-
       return okQ && okCat && okCountry;
     });
   }, [initialRecipes, query, category, country]);
@@ -75,19 +67,15 @@ export default function SearchRecipeClient({
     [filteredLocal.length],
   );
 
-  // ✅ fetch ใหม่เมื่อมี filter (คงของเดิมไว้ แต่ให้แน่ใจส่งค่าจริงจาก DB)
   useEffect(() => {
     if (!mounted) return;
-
     const t = setTimeout(async () => {
       setLoading(true);
-
       try {
         const params = new URLSearchParams();
         if (query.trim()) params.set('q', query.trim());
         if (category) params.set('category', category);
         if (country) params.set('country', country);
-
         const res = await fetch(`/api/recipes?${params.toString()}`);
         const data = await res.json();
         setRecipes(Array.isArray(data) ? data : []);
@@ -97,9 +85,11 @@ export default function SearchRecipeClient({
         setLoading(false);
       }
     }, 300);
-
     return () => clearTimeout(t);
   }, [mounted, query, category, country]);
+
+  // suppress unused warning
+  void recipes;
 
   return (
     <div className="bg-[#F9F7EB]">
@@ -107,14 +97,21 @@ export default function SearchRecipeClient({
         <h1 className="text-[105px] font-semibold text-[#637402]">Recipes</h1>
 
         <div className="relative flex items-center gap-2">
+          {/* ✅ เพิ่ม <label> ให้ input เพื่อแก้ Accessibility */}
+          <label htmlFor="search" className="sr-only">
+            ค้นหาเมนู
+          </label>
           <input
+            id="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="ค้นหาเมนู..."
             className="bg-white w-full px-14 py-3 rounded-3xl outline-none text-black placeholder:text-gray-400"
-            id="search"
           />
-          <span className="absolute left-6 pointer-events-none">
+          <span
+            className="absolute left-6 pointer-events-none"
+            aria-hidden="true"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -133,13 +130,19 @@ export default function SearchRecipeClient({
 
         <div className="flex justify-between mt-3 text-black">
           <p className="text-[24px] font-semibold">Filter recipes</p>
-          <p className="text-[24px] font-semibold">{itemsText}</p>
+          <p className="text-[24px] font-semibold" aria-live="polite">
+            {itemsText}
+          </p>
         </div>
 
         <div className="flex gap-7 mt-5 items-center">
-          {/* Category */}
+          {/* ✅ เพิ่ม <label> ให้ select ทุกตัว เพื่อแก้ Accessibility */}
           <div className="flex items-center relative w-90">
+            <label htmlFor="category-filter" className="sr-only">
+              กรองตามหมวดหมู่
+            </label>
             <select
+              id="category-filter"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="appearance-none bg-white rounded-3xl py-3 px-4 pr-10 text-gray-700 outline-none cursor-pointer w-full"
@@ -151,8 +154,10 @@ export default function SearchRecipeClient({
                 </option>
               ))}
             </select>
-
-            <i className="absolute right-4 pointer-events-none">
+            <i
+              className="absolute right-4 pointer-events-none"
+              aria-hidden="true"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -167,9 +172,12 @@ export default function SearchRecipeClient({
             </i>
           </div>
 
-          {/* Country */}
           <div className="flex items-center relative w-90">
+            <label htmlFor="country-filter" className="sr-only">
+              กรองตามประเทศ
+            </label>
             <select
+              id="country-filter"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               className="appearance-none bg-white rounded-3xl py-3 px-4 pr-10 text-gray-700 outline-none cursor-pointer w-full"
@@ -181,8 +189,10 @@ export default function SearchRecipeClient({
                 </option>
               ))}
             </select>
-
-            <i className="absolute right-4 pointer-events-none">
+            <i
+              className="absolute right-4 pointer-events-none"
+              aria-hidden="true"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -197,7 +207,6 @@ export default function SearchRecipeClient({
             </i>
           </div>
 
-          {/* Reset */}
           <button
             type="button"
             onClick={() => {
@@ -211,41 +220,47 @@ export default function SearchRecipeClient({
             Reset
           </button>
 
-          {/* Add */}
-          <div>
-            <Link href="/recipes/new">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="48"
-                height="48"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  fill="#637402"
-                  d="M208 32H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16m-24 104h-48v48a8 8 0 0 1-16 0v-48H72a8 8 0 0 1 0-16h48V72a8 8 0 0 1 16 0v48h48a8 8 0 0 1 0 16"
-                  strokeWidth="6.5"
-                  stroke="#637402"
-                />
-              </svg>
-            </Link>
-          </div>
+          {/* ✅ เพิ่ม aria-label ให้ Link ที่ไม่มีข้อความ แก้ "Links do not have a discernible name" */}
+          {isAdmin && (
+            <div>
+              <Link href="/recipes/new" aria-label="เพิ่มสูตรอาหารใหม่">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 256 256"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="#637402"
+                    d="M208 32H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16m-24 104h-48v48a8 8 0 0 1-16 0v-48H72a8 8 0 0 1 0-16h48V72a8 8 0 0 1 16 0v48h48a8 8 0 0 1 0 16"
+                    strokeWidth="6.5"
+                    stroke="#637402"
+                  />
+                </svg>
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="mt-16">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <div
+              className="flex flex-col items-center justify-center py-20 gap-4"
+              role="status"
+              aria-label="กำลังโหลด"
+            >
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#637402] border-t-transparent" />
               <p className="text-[#637402] font-semibold">กำลังโหลด...</p>
             </div>
           ) : (
             <>
-              {!loading &&
-                (query.trim() || category || country) &&
+              {(query.trim() || category || country) &&
                 filteredLocal.length === 0 && (
                   <div className="flex justify-center mt-10">
                     <Image
                       src="/nodata.png"
-                      alt="ไม่พบสูตรอาหาร"
+                      alt="ไม่พบสูตรอาหารที่ค้นหา"
                       width={350}
                       height={350}
                       className="opacity-90"
@@ -255,21 +270,30 @@ export default function SearchRecipeClient({
                 )}
 
               <div className="grid grid-cols-4 gap-4 mt-4 pb-10">
-                {filteredLocal.map((r) => (
-                  <Link key={r.id} href={`/recipes/${r.id}`}>
+                {filteredLocal.map((r, index) => (
+                  <Link
+                    key={r.id}
+                    href={`/recipes/${r.id}`}
+                    aria-label={`ดูสูตร ${r.name}`}
+                  >
                     <div className="text-black rounded-2xl bg-[#FEFEF6] overflow-hidden group flex flex-col h-full hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300">
-                      {/* รูปอยู่บนสุด */}
-                      <div className="h-48 overflow-hidden">
-                        <img
+                      {/* ✅ เปลี่ยนจาก <img> เป็น <Image> + กำหนด width/height ตายตัว แก้ CLS + Image delivery */}
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
                           src={
                             r.coverImage ??
                             'https://picsum.photos/seed/food/800/500'
                           }
-                          className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+                          alt={`ภาพปกสูตร ${r.name}`}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                          className="object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+                          // ✅ priority เฉพาะ 4 รูปแรก แก้ LCP
+                          priority={index < 4}
+                          loading={index < 4 ? undefined : 'lazy'}
                         />
                       </div>
 
-                      {/* ชื่ออยู่ใต้รูป */}
                       <div className="p-4 flex flex-col gap-2 flex-1">
                         <h2 className="font-semibold text-black text-[16px] line-clamp-1">
                           {r.name}

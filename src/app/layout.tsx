@@ -14,6 +14,13 @@ const kanit = Kanit({
   variable: '--font-kanit',
 });
 
+export const metadata = {
+  metadataBase: new URL(
+    'https://khangsaeb-76hfbal7t-nattapon-aonsris-projects.vercel.app',
+  ),
+  robots: { index: true, follow: true },
+};
+
 export default function RootLayout({
   children,
 }: {

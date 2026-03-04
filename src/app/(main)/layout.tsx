@@ -1,7 +1,7 @@
-import Footer from '@/components/footer';
 import OnlinePing from '@/components/OnlinePing';
 import NextTopLoader from 'nextjs-toploader';
 import NavbarAuthClient from '@/components/NavbarAuthClient';
+import Footer from '@/components/footer';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,7 +23,7 @@ export default async function MainLayout({
       <NextTopLoader color="#637402" showSpinner={false} />
       <OnlinePing />
       <NavbarAuthClient />
-      {children}
+      <main>{children}</main>
       <Footer />
     </>
   );
