@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { unstable_noStore as noStore } from 'next/cache';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
@@ -8,6 +9,7 @@ import { isAdminByEmail } from '@/lib/admin';
 type NavItem = { label: string; href: string };
 
 export default async function Footer() {
+  noStore();
   const cookieStore = await cookies();
   const token = cookieStore.getAll().find((c) => c.name === 'token')?.value;
 
