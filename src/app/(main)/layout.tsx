@@ -8,10 +8,9 @@ export const revalidate = 0;
 
 export const metadata = {
   title: 'Khang Saeb',
-  description: 'Recipe App',
-  icons: {
-    icon: '/favicon.ico',
-  },
+  description:
+    'อาณาจักรแห่งความอร่อย รวมสูตรอาหารไทยและนานาชาติ ค้นหาเมนูจากวัตถุดิบที่มี',
+  icons: { icon: '/favicon.ico' },
 };
 
 export default async function MainLayout({

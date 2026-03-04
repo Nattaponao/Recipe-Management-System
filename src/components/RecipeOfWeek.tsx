@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 
 type RecipePick = {
   id: string;
@@ -43,7 +43,6 @@ function formatDate(d?: string | null) {
   if (!d) return null;
   const dt = new Date(d);
   if (Number.isNaN(dt.getTime())) return null;
-
   return dt.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -54,7 +53,6 @@ function formatDate(d?: string | null) {
 function ownerName(recipe: RecipePick, fallback: string) {
   const n = recipe.author?.name?.trim();
   if (n) return n;
-  // ถ้าไม่มี name ใช้ email ก่อน @
   const e = recipe.author?.email?.trim();
   if (e) return e.split('@')[0];
   return fallback;
@@ -73,15 +71,12 @@ function Modal({
 }) {
   useEffect(() => {
     if (!open) return;
-
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKeyDown);
-
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = prev;
@@ -122,8 +117,6 @@ export default function RecipeOfWeek({
 }) {
   const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
   const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>({});
-
-  // ===== slots from DB =====
   const [slots, setSlots] = useState<Record<1 | 2 | 3 | 4, SlotData> | null>(
     null,
   );
@@ -140,14 +133,12 @@ export default function RecipeOfWeek({
 
   useEffect(() => {
     if (!slots) return;
-
     const ids = [
       slots[1]?.recipe?.id,
       slots[2]?.recipe?.id,
       slots[3]?.recipe?.id,
       slots[4]?.recipe?.id,
     ].filter((id): id is string => !!id && id !== '[id]');
-
     ids.forEach(async (id) => {
       const r = await fetch(`/api/recipes/${id}/like`);
       if (r.ok) {
@@ -174,22 +165,21 @@ export default function RecipeOfWeek({
     })();
   }, []);
 
-  // ===== modal picker =====
   const [open, setOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<1 | 2 | 3 | 4>(1);
-  const [recipes, setRecipes] = useState<RecipePick[]>([]);
+  const [recipeList, setRecipeList] = useState<RecipePick[]>([]);
   const [loadingRecipes, setLoadingRecipes] = useState(false);
   const [q, setQ] = useState('');
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
   async function ensureRecipesLoaded() {
-    if (recipes.length > 0) return;
+    if (recipeList.length > 0) return;
     setLoadingRecipes(true);
     try {
       const r = await fetch('/api/admin/recipes', { cache: 'no-store' });
       const data = await r.json().catch(() => ({}));
-      setRecipes(Array.isArray(data.recipes) ? data.recipes : []);
+      setRecipeList(Array.isArray(data.recipes) ? data.recipes : []);
     } finally {
       setLoadingRecipes(false);
     }
@@ -206,16 +196,15 @@ export default function RecipeOfWeek({
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return recipes;
-    return recipes.filter((x) => (x.name ?? '').toLowerCase().includes(s));
-  }, [q, recipes]);
+    if (!s) return recipeList;
+    return recipeList.filter((x) => (x.name ?? '').toLowerCase().includes(s));
+  }, [q, recipeList]);
 
   async function saveSlot() {
     if (!selectedRecipeId) {
       alert('เลือกเมนูก่อน');
       return;
     }
-
     setSaving(true);
     try {
       const r = await fetch('/api/admin/featured', {
@@ -223,20 +212,17 @@ export default function RecipeOfWeek({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slot: activeSlot, recipeId: selectedRecipeId }),
       });
-
       const data = await r.json().catch(() => ({}));
       if (!r.ok) {
         alert(data?.message ?? 'save failed');
         return;
       }
-
       const rr = await fetch('/api/featured', { cache: 'no-store' });
       const dd = await rr.json().catch(() => ({}));
       const arr: SlotData[] = Array.isArray(dd.slots) ? dd.slots : [];
       const map: any = {};
       for (const s of arr) map[s.slot] = s;
       setSlots(map);
-
       setOpen(false);
     } finally {
       setSaving(false);
@@ -247,7 +233,7 @@ export default function RecipeOfWeek({
     return (
       <div className="min-h-screen bg-[#F9F7EB] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <img src="/loading.gif" alt="loading" className="w-32 h-32" />
+          <Image src="/loading.gif" alt="loading" width={128} height={128} />
           <p className="text-[#637402] font-semibold">กำลังโหลดนะ...</p>
         </div>
       </div>
@@ -259,7 +245,6 @@ export default function RecipeOfWeek({
   const r2 = slots[3].recipe;
   const r3 = slots[4].recipe;
 
-  // default profile (ตามเดิมของมึง)
   const defaultProfile = (slot: 1 | 2 | 3 | 4) => {
     if (slot === 1)
       return {
@@ -284,16 +269,16 @@ export default function RecipeOfWeek({
     const def = defaultProfile(slot);
     const name = recipe.author ? ownerName(recipe, def.name) : def.name;
     const date = formatDate(recipe.createdAt) ?? def.date;
-
     const avatar: string | null = recipe.author?.image ?? null;
-
     return (
       <div className="flex items-center gap-4">
         <div className="w-[34px] h-[34px] rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-[#637402]">
           {avatar ? (
-            <img
+            <Image
               src={avatar}
               alt="person"
+              width={34}
+              height={34}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -364,29 +349,24 @@ export default function RecipeOfWeek({
           Edit
         </button>
       )}
-
-      {/* รูป: ล็อกแค่ความกว้างรูป ไม่ดันทั้งการ์ด */}
-      <div className="shrink-0 w-[275px] group overflow-hidden ">
-        <img
+      <div className="shrink-0 w-[275px] relative group overflow-hidden">
+        <Image
           src={recipe.coverImage ?? '/nodata.png'}
           alt={recipe.name ?? 'Recipe'}
-          className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
         />
       </div>
-
-      {/* เนื้อหา: ให้ยุบได้ */}
       <div className="p-5 flex-1 min-w-0">
         <p className="font-semibold line-clamp-2">
           {recipe.name ?? 'Untitled'}
         </p>
-
         <div className="flex items-center justify-between mt-5">
           <p className="py-1.5 px-3 border rounded-3xl text-[14px] font-semibold">
             {recipe.category ?? '-'}
           </p>
           <Heart id={recipe.id} />
         </div>
-
         <hr className="border border-[#DFD3A4] my-3.5" />
         <Profile slot={slot} recipe={recipe} />
       </div>
@@ -401,7 +381,6 @@ export default function RecipeOfWeek({
           <div className="bg-[#FEFEF6] p-5 rounded-2xl">
             <div className="flex items-center justify-between">
               <h1 className="text-[30px] font-semibold">Recipe of Week</h1>
-
               {isAdmin && (
                 <button
                   type="button"
@@ -412,31 +391,28 @@ export default function RecipeOfWeek({
                 </button>
               )}
             </div>
-
             <div className="flex justify-center">
               <div>
-                <div className="my-7 w-[520px] overflow-hidden ">
+                <div className="my-7 w-[520px] overflow-hidden">
                   <div
                     className="relative w-full group overflow-hidden"
                     style={{ aspectRatio: '5 / 4' }}
                   >
-                    <img
+                    <Image
                       src={left.coverImage ?? '/nodata.png'}
                       alt={left.name ?? 'Recipe'}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                     />
                   </div>
                 </div>
-
                 <div className="flex justify-between items-center">
                   <p className="text-[14px] font-semibold py-1 px-7 border rounded-3xl">
                     {left.category ?? 'curry'}
                   </p>
                   <Heart id={left.id} />
                 </div>
-
                 <hr className="border border-[#DFD3A4] my-6" />
-
                 <Profile slot={1} recipe={left} />
               </div>
             </div>
@@ -473,7 +449,6 @@ export default function RecipeOfWeek({
             {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
-
         {loadingRecipes ? (
           <div className="py-10 flex flex-col items-center justify-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#637402] border-t-transparent" />
@@ -487,40 +462,30 @@ export default function RecipeOfWeek({
           <div className="mt-4 grid grid-cols-2 gap-5 max-h-[55vh] overflow-auto pr-2">
             {filtered.map((r) => {
               const active = selectedRecipeId === r.id;
-
               return (
                 <button
                   key={r.id}
                   type="button"
                   onClick={() => setSelectedRecipeId(r.id)}
-                  className={`group text-left rounded-2xl bg-white overflow-hidden transition-all duration-200
-            ring-1 ring-black/10 cursor-pointer
-            ${active ? 'ring-2 ring-[#637402] shadow-lg' : 'hover:shadow-md hover:ring-black/20'}
-          `}
+                  className={`group text-left rounded-2xl bg-white overflow-hidden transition-all duration-200 ring-1 ring-black/10 cursor-pointer ${active ? 'ring-2 ring-[#637402] shadow-lg' : 'hover:shadow-md hover:ring-black/20'}`}
                 >
-                  {/* รูป */}
                   <div className="relative h-[150px] w-full bg-gray-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={r.coverImage ?? '/nodata.png'}
                       alt={r.name ?? 'recipe'}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
-
-                    {/* badge มุมขวาบน */}
-                    {active ? (
+                    {active && (
                       <div className="absolute top-2 right-2 text-[11px] px-2 py-1 rounded-full bg-[#637402] text-white shadow">
                         เลือกแล้ว
                       </div>
-                    ) : null}
+                    )}
                   </div>
-
-                  {/* เนื้อหา */}
                   <div className="p-3">
                     <div className="font-semibold text-sm leading-snug line-clamp-2">
                       {r.name ?? '(no name)'}
                     </div>
-
                     <div className="mt-1 text-xs text-gray-500 flex items-center justify-between">
                       <span className="truncate">{r.category ?? '-'}</span>
                       <span className="opacity-0 group-hover:opacity-100 transition text-[#637402]">
