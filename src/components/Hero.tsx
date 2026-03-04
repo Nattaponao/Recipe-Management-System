@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 type HeroStore = {
@@ -108,7 +109,7 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
   const [data, setData] = useState<HeroStore>(DEFAULT_STORE);
   const [hoverImg, setHoverImg] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
-
+  const router = useRouter();
   useEffect(() => {
     loadFromDB().then(setData);
   }, []);
@@ -192,7 +193,12 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
                 </span>
               </div>
 
-              <button className="bg-[#1C1C1E] text-[#DFD3A4] py-2 px-7 rounded-full text-[14px] font-medium hover:bg-[#2c2c2e] transition-colors cursor-pointer tracking-wide">
+              <button
+                onClick={() =>
+                  router.push('/recipes/485b3185-c8c0-4e6e-abb3-282a8ca3849f')
+                }
+                className="bg-[#1C1C1E] text-[#DFD3A4] py-2 px-7 rounded-full text-[14px] font-medium hover:bg-[#2c2c2e] transition-colors cursor-pointer tracking-wide"
+              >
                 <InlineText
                   isAdmin={isAdmin}
                   initialValue={data.ctaText}
