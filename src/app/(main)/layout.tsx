@@ -4,6 +4,7 @@ import OnlinePing from '@/components/OnlinePing';
 import NextTopLoader from 'nextjs-toploader';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'Khang Saeb',
