@@ -3,6 +3,8 @@ import NavbarV2 from '@/components/navV2';
 import Footer from '@/components/footer';
 import RecipeDetailClient from './RecipeDetailClient';
 import { fredoka } from '@/lib/fonts';
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -25,7 +27,6 @@ export async function generateMetadata({
     return { title: 'Khang Saeb | Recipe' };
   }
 }
-
 export default async function RecipeDetailPage({ params }: Props) {
   const { id } = await params;
   if (!id) return notFound();
@@ -33,12 +34,24 @@ export default async function RecipeDetailPage({ params }: Props) {
   let recipeSafe = null;
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/recipes/${id}`,
-      { cache: 'no-store' },
+    const recipe = await prisma.recipe.findUnique({
+      where: { id },
+      include: {
+        ingredients: { orderBy: { sortOrder: 'asc' } },
+        steps: { orderBy: { stepNo: 'asc' } },
+        author: { select: { id: true, name: true } },
+      },
+    });
+
+    if (!recipe) return notFound();
+
+    recipeSafe = JSON.parse(
+      JSON.stringify(recipe, (_key, value) => {
+        if (typeof value === 'bigint') return value.toString();
+        if (value instanceof Prisma.Decimal) return value.toString();
+        return value;
+      }),
     );
-    if (!res.ok) return notFound();
-    recipeSafe = await res.json();
   } catch {
     return notFound();
   }
