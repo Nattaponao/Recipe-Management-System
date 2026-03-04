@@ -1,5 +1,6 @@
 import './globals.css';
 import { Fredoka, Kanit } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const fredoka = Fredoka({
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="th" className={`${fredoka.variable} ${kanit.variable}`}>
       <body>
         {children}
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>
