@@ -409,8 +409,8 @@ export default function RecipeDetailClient({
         </div>
 
         <div className="container mx-auto mt-28">
-          <div className="max-w-[1200px] mx-auto">
-            <div className="grid grid-cols-[1fr_500px] gap-16 items-start">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="grid grid-cols-[1fr_minmax(0,500px)] gap-8 xl:gap-16 items-start">
               <div className="pt-14">
                 <hr className="w-full border-0 h-px bg-[#637402]/40" />
               </div>
