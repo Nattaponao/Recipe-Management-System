@@ -408,21 +408,22 @@ export default function RecipeDetailClient({
           </div>
         </div>
 
-        <div className="container mx-auto mt-28">
-          <div className="max-w-[1400px] mx-auto">
-            <div className="grid grid-cols-[1fr_minmax(0,500px)] gap-8 xl:gap-16 items-start">
-              <div className="pt-14">
+        <div className="w-full mt-28 px-10">
+          <div className="mb-16">
+            <div className="grid grid-cols-2 gap-8 items-start">
+              <div className="pt-16">
                 <hr className="w-full border-0 h-px bg-[#637402]/40" />
               </div>
+
               <div>
                 <h2 className="text-[105px] font-semibold text-[#637402] leading-none">
                   INGREDIENTS
                 </h2>
-                {recipe.ingredients?.length === 0 ? (
-                  <p className="text-gray-500 mt-6">ยังไม่มีวัตถุดิบ</p>
-                ) : (
-                  <ul className="mt-4 bg-[#FEFEF6] rounded-2xl px-8 py-6 text-[18px] shadow-sm text-gray-800">
-                    {recipe.ingredients
+                <ul className="mt-4 bg-[#FEFEF6] rounded-2xl px-8 py-6 text-[18px] shadow-sm text-gray-800">
+                  {recipe.ingredients?.length === 0 ? (
+                    <li className="text-gray-500">ยังไม่มีวัตถุดิบ</li>
+                  ) : (
+                    recipe.ingredients
                       ?.slice()
                       .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
                       .map((ing) => (
@@ -432,38 +433,37 @@ export default function RecipeDetailClient({
                             {ing.amount ?? ''} {ing.unit ?? ''}
                           </span>
                         </li>
-                      ))}
-                  </ul>
-                )}
+                      ))
+                  )}
+                </ul>
               </div>
             </div>
           </div>
 
-          <h2 className="text-[105px] font-semibold mt-10 mb-4 text-[#637402]">
-            PREPARATION
-          </h2>
-          <div className="flex items-center justify-between pb-32">
-            <div>
-              {recipe.steps.length === 0 ? (
-                <p className="text-gray-800 mt-4">ยังไม่มีขั้นตอน</p>
-              ) : (
-                <ol className="space-y-4 text-gray-800">
-                  {recipe.steps.map((s) => (
-                    <li key={s.id} className="mt-10 flex gap-5">
-                      <hr className="w-20 border-0 h-px bg-[#637402] mt-6" />
-                      <div className="flex flex-col">
-                        <div className="text-[30px] font-semibold text-[#637402]">
-                          Step {s.stepNo}
-                        </div>
-                        <div className="text-[22px] font-semibold mt-5">
-                          <p>{s.text}</p>
-                        </div>
+          {/* PREPARATION */}
+          <div className="pb-32">
+            <h2 className="text-[105px] font-semibold mb-4 text-[#637402]">
+              PREPARATION
+            </h2>
+            {recipe.steps.length === 0 ? (
+              <p className="text-gray-800 mt-4">ยังไม่มีขั้นตอน</p>
+            ) : (
+              <ol className="space-y-4 text-gray-800">
+                {recipe.steps.map((s) => (
+                  <li key={s.id} className="mt-10 flex gap-5">
+                    <hr className="w-20 border-0 h-px bg-[#637402] mt-6 shrink-0" />
+                    <div className="flex flex-col">
+                      <div className="text-[30px] font-semibold text-[#637402]">
+                        Step {s.stepNo}
                       </div>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
+                      <div className="text-[22px] font-semibold mt-5">
+                        <p>{s.text}</p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
         </div>
       </div>
