@@ -185,10 +185,10 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
 }
 
 // --- MAIN COMPONENT ---
-export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean }) {
+export default function RecipeOfWeek({ isAdmin = false,initialSlots }: { isAdmin?: boolean;initialSlots: Record<1 | 2 | 3 | 4, SlotData>; }) {
   const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
   const [likeCounts, setLikeCounts] = useState<{ [key: string]: number }>({});
-  const [slots, setSlots] = useState<Record<1 | 2 | 3 | 4, SlotData> | null>(null);
+  const [slots, setSlots] = useState<Record<1 | 2 | 3 | 4, SlotData>>(initialSlots);
   const [loadingSlots, setLoadingSlots] = useState(true);
 
   const [open, setOpen] = useState(false);
@@ -342,6 +342,7 @@ export default function RecipeOfWeek({ isAdmin = false }: { isAdmin?: boolean })
                     alt={left.name ?? 'Recipe'}
                     fill
                     sizes="520px"
+                    priority
                     className="object-cover transition-transform duration-300 ease-out hover:scale-105"
                   />
                 </div>

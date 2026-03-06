@@ -192,13 +192,7 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
                   />
                 </button>
                 <span className="text-[12px]">
-                  <InlineText
-                    isAdmin={isAdmin}
-                    initialValue={data.readTime}
-                    onChange={(v) =>
-                      patch({ readTime: v.trim() || DEFAULT_STORE.readTime })
-                    }
-                  />
+                  12 time read
                 </span>
               </div>
 
@@ -208,13 +202,7 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
                 }
                 className="bg-[#1C1C1E] text-[#DFD3A4] py-2 px-7 rounded-full text-[14px] font-medium hover:bg-[#2c2c2e] transition-colors cursor-pointer tracking-wide"
               >
-                <InlineText
-                  isAdmin={isAdmin}
-                  initialValue={data.ctaText}
-                  onChange={(v) =>
-                    patch({ ctaText: v.trim() || DEFAULT_STORE.ctaText })
-                  }
-                />
+               READ NOW
               </button>
             </div>
           </div>
