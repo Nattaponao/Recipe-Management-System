@@ -7,7 +7,9 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
-import { isAdminByEmail } from '@/lib/admin';
+import { Suspense } from 'react';
+
+// 🌟 Import แบบธรรมดาได้เลย (แก้ปัญหา Build พังจาก ssr: false)
 import AdminDashboardClientCharts from './AdminDashboardClientCharts';
 import TopRecipesWidget from './TopRecipesWidget';
 
@@ -26,22 +28,10 @@ function dayLabel(d: Date) {
   }).format(d);
 }
 
-export default async function AdminDashboardPage() {
-  // ---- auth guard ----
-  const cookieStore = await cookies();
-  const token = cookieStore.getAll().find((c) => c.name === 'token')?.value;
-  if (!token) redirect('/login');
-
-  let adminEmail = '';
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    adminEmail = String(payload?.email ?? '');
-    if (!(await isAdminByEmail(adminEmail))) redirect('/');
-  } catch {
-    redirect('/login');
-  }
-
-  // ---- data ----
+// ==========================================
+// 🌟 ส่วนที่ดึง Database (แยกออกมาเพื่อให้ทำ Streaming ได้)
+// ==========================================
+async function DashboardContent() {
   const now = new Date();
 
   const from14 = new Date(now.getTime() - 13 * 24 * 60 * 60 * 1000);
@@ -53,6 +43,7 @@ export default async function AdminDashboardPage() {
   const fromPrev7 = new Date(now.getTime() - 13 * 24 * 60 * 60 * 1000);
   fromPrev7.setHours(0, 0, 0, 0);
 
+  // ดึงพร้อมกันทีเดียว 10 ก้อน
   const [
     userCount,
     recipeCount,
@@ -61,7 +52,6 @@ export default async function AdminDashboardPage() {
     recipeByCategory,
     recipeDaily,
     onlineCount,
-
     topRecipes,
     likesTotal,
     recipesThis7,
@@ -98,12 +88,10 @@ export default async function AdminDashboardPage() {
       select: { createdAt: true },
     }),
 
-    // ✅ Online now (5 นาที)
     prisma.user.count({
       where: { lastSeen: { gte: new Date(now.getTime() - 5 * 60 * 1000) } },
     }),
 
-    // 🔥 Top Recipes by likes
     prisma.recipe.findMany({
       take: 5,
       orderBy: { recipe_likes: { _count: 'desc' } },
@@ -117,13 +105,10 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // ❤️ total likes
     prisma.recipe_likes.count(),
 
-    // 📈 recipes this 7 days
     prisma.recipe.count({ where: { createdAt: { gte: from7 } } }),
 
-    // 📈 recipes previous 7 days
     prisma.recipe.count({
       where: { createdAt: { gte: fromPrev7, lt: from7 } },
     }),
@@ -135,7 +120,6 @@ export default async function AdminDashboardPage() {
   );
   const growthUp = recipesThis7 >= recipesPrev7;
 
-  // ส่งให้ TopRecipesWidget (client) แบบ clean
   const topRecipeItems = topRecipes.map((r: any) => ({
     id: r.id,
     name: r.name,
@@ -145,7 +129,6 @@ export default async function AdminDashboardPage() {
     likeCount: r._count?.recipe_likes ?? 0,
   }));
 
-  // ---- build daily series (recipes only) ----
   const dayKeys: string[] = [];
   const dayMap: Record<string, { recipes: number; users: number }> = {};
 
@@ -173,190 +156,203 @@ export default async function AdminDashboardPage() {
     .slice(0, 8);
 
   return (
-    <div className="min-h-screen bg-[#F9F7EB]">
-      <div className="container mx-auto px-4 py-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
-            <h1 className="text-[#637402] text-4xl md:text-5xl font-semibold">
-              Admin Dashboard
-            </h1>
-            <p className="text-[#637402]/70 mt-2">
-              Logged in as <span className="font-semibold">{adminEmail}</span>
-            </p>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
+          <div className="text-[#637402]/70 font-semibold">Total Users</div>
+          <div className="text-[#637402] text-5xl font-semibold mt-2">
+            {userCount}
           </div>
-
-          <div className="flex gap-3">
+          <div className="mt-4">
             <Link
               href="/admin/users"
-              className="bg-[#637402] text-white px-5 py-2 rounded-2xl hover:opacity-90 transition"
+              className="text-[#637402] font-semibold hover:underline"
             >
-              Manage Users
+              View users →
             </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
+          <div className="text-[#637402]/70 font-semibold">Total Recipes</div>
+          <div className="text-[#637402] text-5xl font-semibold mt-2">
+            {recipeCount}
+          </div>
+          <div className="mt-4">
             <Link
               href="/admin/recipes"
-              className="border border-[#637402] text-[#637402] px-5 py-2 rounded-2xl hover:bg-[#DFD3A4]/40 transition"
+              className="text-[#637402] font-semibold hover:underline"
             >
-              Manage Recipes
+              View recipes →
             </Link>
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
-            <div className="text-[#637402]/70 font-semibold">Total Users</div>
-            <div className="text-[#637402] text-5xl font-semibold mt-2">
-              {userCount}
-            </div>
-            <div className="mt-4">
-              <Link
-                href="/admin/users"
-                className="text-[#637402] font-semibold hover:underline"
-              >
-                View users →
-              </Link>
-            </div>
+        <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
+          <div className="text-[#637402]/70 font-semibold">Online now</div>
+          <div className="text-[#637402] text-5xl font-semibold mt-2">
+            {onlineCount}
           </div>
-
-          <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
-            <div className="text-[#637402]/70 font-semibold">Total Recipes</div>
-            <div className="text-[#637402] text-5xl font-semibold mt-2">
-              {recipeCount}
-            </div>
-            <div className="mt-4">
-              <Link
-                href="/admin/recipes"
-                className="text-[#637402] font-semibold hover:underline"
-              >
-                View recipes →
-              </Link>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
-            <div className="text-[#637402]/70 font-semibold">Online now</div>
-            <div className="text-[#637402] text-5xl font-semibold mt-2">
-              {onlineCount}
-            </div>
-            <div className="text-[#637402]/60 mt-2 text-sm">
-              active in last 5 minutes
-            </div>
-          </div>
-
-          <div className="bg-[#637402] rounded-3xl shadow-sm p-6 text-white relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
-            <div className="text-white/80 font-semibold">Quick Actions</div>
-            <div className="mt-3 flex flex-col gap-2">
-              <Link
-                href="/admin/recipes"
-                className="bg-black/40 hover:bg-black/50 px-4 py-2 rounded-2xl"
-              >
-                Review Recipes
-              </Link>
-              <Link
-                href="/admin/users"
-                className="bg-black/40 hover:bg-black/50 px-4 py-2 rounded-2xl"
-              >
-                Check Users
-              </Link>
-            </div>
+          <div className="text-[#637402]/60 mt-2 text-sm">
+            active in last 5 minutes
           </div>
         </div>
 
-        {/* Charts + Sidebar Widgets */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8 min-w-0">
-          {/* Left: Charts */}
-          <div className="lg:col-span-8 min-w-0">
-            <AdminDashboardClientCharts daily={daily} byCategory={byCategory} />
-          </div>
+       
+      </div>
 
-          {/* Right: Sidebar Widgets */}
-          <div className="lg:col-span-4 min-w-0 flex flex-col gap-6">
-            {/* ✅ Client widget (มี fallback รูป, ทำ interactivity ได้) */}
-            <TopRecipesWidget items={topRecipeItems} />
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8 min-w-0">
+        <div className="lg:col-span-8 min-w-0">
+          <AdminDashboardClientCharts daily={daily} byCategory={byCategory} />
         </div>
+        <div className="lg:col-span-4 min-w-0 flex flex-col gap-6">
+          <TopRecipesWidget items={topRecipeItems} />
+        </div>
+      </div>
 
-        {/* Latest Lists */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-          {/* Latest Recipes */}
-          <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-[#637402] text-2xl font-semibold">
-                Latest Recipes
-              </h2>
-              <Link
-                href="/admin/recipes"
-                className="text-[#637402] hover:underline font-semibold"
-              >
-                See all
-              </Link>
-            </div>
-
-            <div className="mt-4 divide-y divide-[#637402]/10">
-              {latestRecipes.map((r) => (
-                <div
-                  key={r.id}
-                  className="py-3 flex items-start justify-between gap-4"
-                >
-                  <div>
-                    <div className="text-[#637402] font-semibold">
-                      {r.name || 'Untitled recipe'}
-                    </div>
-                    <div className="text-sm text-[#637402]/70 mt-1">
-                      {fmtDate(r.createdAt)}
-                      {r.category ? ` • ${r.category}` : ''}
-                      {r.country ? ` • ${r.country}` : ''}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/recipes/${r.id}`}
-                    className="shrink-0 border border-[#637402] text-[#637402] px-3 py-1.5 rounded-2xl hover:bg-[#DFD3A4]/40 transition text-sm"
-                  >
-                    View
-                  </Link>
-                </div>
-              ))}
-
-              {latestRecipes.length === 0 && (
-                <div className="py-6 text-[#637402]/70">No recipes yet.</div>
-              )}
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[#637402] text-2xl font-semibold">
+              Latest Recipes
+            </h2>
+            <Link
+              href="/admin/recipes"
+              className="text-[#637402] hover:underline font-semibold"
+            >
+              See all
+            </Link>
           </div>
 
-          {/* Latest Users */}
-          <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-[#637402] text-2xl font-semibold">
-                Latest Users
-              </h2>
-              <Link
-                href="/admin/users"
-                className="text-[#637402] hover:underline font-semibold"
+          <div className="mt-4 divide-y divide-[#637402]/10">
+            {latestRecipes.map((r) => (
+              <div
+                key={r.id}
+                className="py-3 flex items-start justify-between gap-4"
               >
-                See all
-              </Link>
-            </div>
-
-            <div className="mt-4 divide-y divide-[#637402]/10">
-              {latestUsers.map((u) => (
-                <div key={u.id} className="py-3">
+                <div>
                   <div className="text-[#637402] font-semibold">
-                    {u.name || '-'}
+                    {r.name || 'Untitled recipe'}
                   </div>
-                  <div className="text-sm text-[#637402]/70">{u.email}</div>
+                  <div className="text-sm text-[#637402]/70 mt-1">
+                    {fmtDate(r.createdAt)}
+                    {r.category ? ` • ${r.category}` : ''}
+                    {r.country ? ` • ${r.country}` : ''}
+                  </div>
                 </div>
-              ))}
 
-              {latestUsers.length === 0 && (
-                <div className="py-6 text-[#637402]/70">No users yet.</div>
-              )}
-            </div>
+                <Link
+                  href={`/recipes/${r.id}`}
+                  className="shrink-0 border border-[#637402] text-[#637402] px-3 py-1.5 rounded-2xl hover:bg-[#DFD3A4]/40 transition text-sm"
+                >
+                  View
+                </Link>
+              </div>
+            ))}
+
+            {latestRecipes.length === 0 && (
+              <div className="py-6 text-[#637402]/70">No recipes yet.</div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[#637402] text-2xl font-semibold">
+              Latest Users
+            </h2>
+            <Link
+              href="/admin/users"
+              className="text-[#637402] hover:underline font-semibold"
+            >
+              See all
+            </Link>
+          </div>
+
+          <div className="mt-4 divide-y divide-[#637402]/10">
+            {latestUsers.map((u) => (
+              <div key={u.id} className="py-3">
+                <div className="text-[#637402] font-semibold">
+                  {u.name || '-'}
+                </div>
+                <div className="text-sm text-[#637402]/70">{u.email}</div>
+              </div>
+            ))}
+
+            {latestUsers.length === 0 && (
+              <div className="py-6 text-[#637402]/70">No users yet.</div>
+            )}
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+// ==========================================
+// 🌟 หน้าหลัก
+// ==========================================
+export default async function AdminDashboardPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value; 
+  if (!token) redirect('/login');
+
+  let adminEmail = '';
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    adminEmail = String(payload?.email ?? '');
+    // 🌟 เอาการเช็ค Database ตรงนี้ออกแล้ว เพราะ `layout.tsx` จัดการให้เรียบร้อย!
+  } catch {
+    redirect('/login');
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-10">
+      
+      {/* Header (แสดงผลทันทีแบบ Instant) */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+          <h1 className="text-[#637402] text-4xl md:text-5xl font-semibold">
+            Admin Dashboard
+          </h1>
+          <p className="text-[#637402]/70 mt-2">
+            Logged in as <span className="font-semibold">{adminEmail}</span>
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <Link
+            href="/admin/users"
+            className="bg-[#637402] text-white px-5 py-2 rounded-2xl hover:opacity-90 transition"
+          >
+            Manage Users
+          </Link>
+          <Link
+            href="/admin/recipes"
+            className="border border-[#637402] text-[#637402] px-5 py-2 rounded-2xl hover:bg-[#DFD3A4]/40 transition"
+          >
+            Manage Recipes
+          </Link>
+        </div>
+      </div>
+
+      {/* 🌟 โชว์โครง Skeleton พรางตาระหว่าง Database วิ่งหาข้อมูล */}
+      <Suspense fallback={
+        <div className="mt-8 space-y-8 animate-pulse">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-white/60 rounded-3xl border border-[#637402]/10" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 h-[400px] bg-white/60 rounded-3xl border border-[#637402]/10" />
+            <div className="lg:col-span-4 h-[400px] bg-white/60 rounded-3xl border border-[#637402]/10" />
+          </div>
+        </div>
+      }>
+        <DashboardContent />
+      </Suspense>
+
     </div>
   );
 }

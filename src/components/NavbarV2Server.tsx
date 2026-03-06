@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { unstable_noStore as noStore } from 'next/cache';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import NavbarV2 from '@/components/navV2';
 import { isAdminByEmail } from '@/lib/admin';
 
 export default async function NavbarV2Server() {
-  noStore();
+  // 🌟 ลบ noStore() ออก เพื่อให้หน้าอื่นที่เรียกใช้ Navbar ทำ Cache ได้
   const cookieStore = await cookies();
-  const token = cookieStore.getAll().find((c) => c.name === 'token')?.value;
+  const token = cookieStore.get('token')?.value;
 
   let isAdmin = false;
   if (token) {

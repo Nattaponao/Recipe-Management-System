@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 const nextConfig = {
-  swcMinify: true, // ✅ Minify JS
+
 
   async headers() {
     return [
@@ -29,13 +29,15 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
-      { protocol: 'https', hostname: 'www.r-haan.com' },
-      { protocol: 'https', hostname: 'food.mthai.com' },
-      { protocol: 'https', hostname: 'img.wongnai.com' },
-      { protocol: 'https', hostname: 'api2.krua.co' },
-      { protocol: 'https', hostname: 'img-global.cpcdn.com' },
-      { protocol: 'https', hostname: 'www.ofm.co.th' },
-      { protocol: 'https', hostname: 'barggdkmqttzpknxtlmz.supabase.co' },
+      { protocol: 'https', hostname: 'www.r-haan.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'food.mthai.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'img.wongnai.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'api2.krua.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'img-global.cpcdn.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'www.ofm.co.th', pathname: '/**' },
+      { protocol: 'https', hostname: 'barggdkmqttzpknxtlmz.supabase.co', pathname: '/**' },
+      { protocol: 'https', hostname: 's359.kapook.com', pathname: '/**' }, // เพิ่ม pathname
+      { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },   // กันเหนียวสำหรับ placeholder
     ],
   },
 };

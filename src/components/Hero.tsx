@@ -41,6 +41,7 @@ async function loadFromDB(): Promise<HeroStore> {
   }
 }
 
+
 async function saveToDB(s: HeroStore) {
   await fetch('/api/hero', {
     method: 'PUT',
@@ -71,11 +72,11 @@ function InlineText({
   const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    // 🌟 FIX 1: เพิ่ม initialValue ใน Dependency เพื่อให้ข้อมูลอัปเดตตาม DB
     if (spanRef.current && spanRef.current.innerText !== initialValue) {
       spanRef.current.innerText = initialValue;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialValue]);
 
   if (!isAdmin) return <span className={className}>{initialValue}</span>;
 
@@ -85,7 +86,8 @@ function InlineText({
       contentEditable
       suppressContentEditableWarning
       className={`outline-none rounded px-0.5 hover:bg-white/10 focus:bg-white/10 ${className ?? ''}`}
-      onInput={(e) => onChange((e.currentTarget as HTMLSpanElement).innerText)}
+      // 🌟 FIX 2: เปลี่ยนเป็น onBlur จะได้ไม่ยิง API ทุกครั้งที่เคาะแป้นพิมพ์
+      onBlur={(e) => onChange((e.currentTarget as HTMLSpanElement).innerText)}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -101,19 +103,20 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
   const [hoverImg, setHoverImg] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
-  const [loaded, setLoaded] = useState(false);
+
+  // ลบ state 'loaded' ออกไป เพื่อให้รูปแสดงผลได้ลื่นไหลขึ้นตั้งแต่เปิดหน้าเว็บ
+
 
   useEffect(() => {
     loadFromDB().then((d) => {
       setData(d);
-      setLoaded(true);
     });
   }, []);
 
   function patch(partial: Partial<HeroStore>) {
     setData((prev) => {
       const next = { ...prev, ...partial };
-      saveToDB(next);
+      saveToDB(next); // 🌟 ตรงนี้เรายิง API ไป แต่เราไม่ได้รอผล
       return next;
     });
   }
@@ -237,16 +240,15 @@ export default function HeroPage({ isAdmin }: { isAdmin: boolean }) {
               </div>
             )}
 
-            {loaded && (
-              <Image
-                src={rightSrc}
-                alt={data.title1 ?? 'hero image'}
-                fill
-                className="object-cover object-center"
-                sizes="48vw"
-                priority
-              />
-            )}
+            {/* 🌟 FIX 3: ปล่อยให้ <Image> ทำงานเลย ไม่ต้องรอ loaded */}
+            <Image
+              src={rightSrc}
+              alt={data.title1 ?? 'hero image'}
+              fill
+              className="object-cover object-center"
+              sizes="48vw"
+              priority
+            />
           </div>
         </div>
       </div>

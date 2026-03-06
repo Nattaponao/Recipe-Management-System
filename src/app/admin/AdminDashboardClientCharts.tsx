@@ -49,73 +49,66 @@ export default function AdminDashboardClientCharts({
 
   return (
     <div className="w-full min-w-0 flex flex-col gap-6">
-      {/* Activity */}
-      <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6 w-full min-w-0">
-        <div className="flex items-end justify-between gap-3">
+      {/* 1. Activity Chart */}
+      <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6 w-full">
+        <div className="flex items-end justify-between gap-3 mb-6">
           <div>
             <h2 className="text-[#637402] text-2xl font-semibold">Activity (14 วัน)</h2>
-            <p className="text-[#637402]/70 text-sm mt-1">
-              จำนวนสูตรที่ถูกเพิ่มในแต่ละวัน{hasUsers ? " และผู้ใช้ใหม่" : ""}
-            </p>
+            <p className="text-[#637402]/70 text-sm mt-1">จำนวนสูตรที่ถูกเพิ่มในแต่ละวัน</p>
           </div>
-          <div className="text-[#637402]/60 text-sm">หน่วย: รายการ</div>
         </div>
 
-        <div className="mt-4 w-full min-w-0">
-          <ResponsiveContainer width="100%" height={320}>
+        <div className="h-[320px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={safeDaily} barCategoryGap={10}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DFD3A4" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#DFD3A4" vertical={false} />
               <XAxis
                 dataKey="day"
-                tick={{ fill: "#637402", fontSize: 12 }}
-                interval={1}
-                angle={-35}
-                textAnchor="end"
-                height={60}
+                tick={{ fill: "#637402", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
               />
-              <YAxis tick={{ fill: "#637402" }} allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                wrapperStyle={{ color: "#637402" }}
-                formatter={(value: any) =>
-                  value === "recipes" ? "Recipes" : value === "users" ? "Users" : value
-                }
+              <YAxis 
+                tick={{ fill: "#637402", fontSize: 11 }} 
+                axisLine={false} 
+                tickLine={false}
+                allowDecimals={false} 
               />
-              <Bar dataKey="recipes" fill="#637402" radius={[10, 10, 0, 0]} />
-              {hasUsers && <Bar dataKey="users" fill="#DFD3A4" radius={[10, 10, 0, 0]} />}
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#637402', opacity: 0.05 }} />
+              <Legend verticalAlign="top" align="right" iconType="circle" />
+              <Bar 
+                dataKey="recipes" 
+                fill="#637402" 
+                radius={[6, 6, 0, 0]} 
+                isAnimationActive={false} // 🌟 ปิด animation เพื่อความลื่น
+              />
+              {hasUsers && (
+                <Bar 
+                  dataKey="users" 
+                  fill="#DFD3A4" 
+                  radius={[6, 6, 0, 0]} 
+                  isAnimationActive={false} 
+                />
+              )}
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {safeDaily.length === 0 && (
-          <div className="mt-4 text-[#637402]/70 text-sm">ยังไม่มีข้อมูลสำหรับกราฟ</div>
-        )}
       </div>
 
-      {/* Category */}
-      <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6 w-full min-w-0">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-[#637402] text-2xl font-semibold">Recipes by Category</h2>
-            <p className="text-[#637402]/70 text-sm mt-1">หมวดที่มีสูตรเยอะสุด</p>
-          </div>
-        </div>
-
-        <div className="mt-4 w-full min-w-0">
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={safeByCategory} barCategoryGap={12}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DFD3A4" />
-              <XAxis dataKey="name" tick={{ fill: "#637402", fontSize: 12 }} interval={0} />
-              <YAxis tick={{ fill: "#637402" }} allowDecimals={false} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#637402" radius={[10, 10, 0, 0]} />
+      {/* 2. Category Chart */}
+      <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6 w-full">
+        <h2 className="text-[#637402] text-2xl font-semibold mb-6">Recipes by Category</h2>
+        <div className="h-[320px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={safeByCategory}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#DFD3A4" vertical={false} />
+              <XAxis dataKey="name" tick={{ fill: "#637402", fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: "#637402", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip cursor={{ fill: '#637402', opacity: 0.05 }} />
+              <Bar dataKey="count" fill="#637402" radius={[6, 6, 0, 0]} isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        {safeByCategory.length === 0 && (
-          <div className="mt-4 text-[#637402]/70 text-sm">ยังไม่มีข้อมูลสำหรับกราฟ</div>
-        )}
       </div>
     </div>
   );

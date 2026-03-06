@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import Image from 'next/image';
@@ -6,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 type RecipeCard = {
   id: string;
-  name: string;
+  name: string | null;
   description: string | null;
   coverImage: string | null;
   category: string | null;
@@ -276,16 +277,12 @@ export default function SearchRecipeClient({
                     <div className="text-black rounded-2xl bg-[#FEFEF6] overflow-hidden group flex flex-col h-full hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300">
                       <div className="relative h-48 overflow-hidden">
                         <Image
-                          src={
-                            r.coverImage ??
-                            'https://picsum.photos/seed/food/800/500'
-                          }
+                          src={r.coverImage ?? 'https://picsum.photos/seed/food/800/500'}
                           alt={`ภาพปกสูตร ${r.name}`}
-                          fill
-                          sizes="(max-width: 768px) 50vw, 25vw"
+                          fill // 🌟 ใช้ fill เพื่อให้รูปเต็มกรอบ h-48
+                          sizes="(max-width: 768px) 100vw, 25vw" // 🌟 ช่วยให้เบราว์เซอร์เลือกขนาดรูปที่เหมาะสม
                           className="object-cover transition-transform duration-300 ease-out group-hover:scale-110"
-                          priority={index < 4}
-                          loading={index < 4 ? undefined : 'lazy'}
+                          priority={index < 4} // 🌟 รูป 4 ใบแรกโหลดแบบ VIP ทันที
                         />
                       </div>
 
