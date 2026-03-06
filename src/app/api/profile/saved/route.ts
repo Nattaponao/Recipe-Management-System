@@ -24,11 +24,11 @@ export async function GET() {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const saves = await prisma.recipe_saves.findMany({
-    where: { user_id: userId },
-    orderBy: { created_at: 'desc' },
+  const saves = await prisma.recipeSave.findMany({
+    where: { userId: userId },
+    orderBy: { createdAt: 'desc' },
     include: {
-      recipes: {
+      recipe: {
         select: {
           id: true,
           name: true,
@@ -41,5 +41,5 @@ export async function GET() {
     },
   });
 
-  return NextResponse.json({ recipes: saves.map((s) => s.recipes) });
+  return NextResponse.json({ recipes: saves.map((s) => s.recipe) });
 }

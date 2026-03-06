@@ -20,18 +20,18 @@ export async function POST(req: NextRequest) {
       .sort()
       .join(',');
 
-    const cached = await prisma.ai_cache.findUnique({
-      where: { ingredients_key: key },
+    const cached = await prisma.aiCache.findUnique({
+      where: { ingredientsKey: key },
     });
 
     const CACHE_TTL_DAYS = 7;
     const isExpired =
       cached &&
-      Date.now() - new Date(cached.created_at).getTime() >
+      Date.now() - new Date(cached.createdAt).getTime() >
         CACHE_TTL_DAYS * 86400000;
 
     if (cached && !isExpired) {
-      return NextResponse.json(cached.result_json);
+      return NextResponse.json(cached.resultJson);
     }
 
     const recipes = await prisma.recipe.findMany({
@@ -75,10 +75,10 @@ export async function POST(req: NextRequest) {
       const top5 = scored.filter((r) => r.matchScore > 0).slice(0, 5);
       const result = mergeImage(top5);
 
-      await prisma.ai_cache.upsert({
-        where: { ingredients_key: key },
-        update: { result_json: result, created_at: new Date() },
-        create: { ingredients_key: key, result_json: result },
+      await prisma.aiCache.upsert({
+        where: { ingredientsKey: key },
+        update: { resultJson: result, createdAt: new Date() },
+        create: { ingredientsKey: key, resultJson: result },
       });
 
       return NextResponse.json(result);
@@ -118,15 +118,15 @@ export async function POST(req: NextRequest) {
 
     const finalResult = mergeImage(analyzed);
 
-    await prisma.ai_cache.upsert({
-      where: { ingredients_key: key },
+    await prisma.aiCache.upsert({
+      where: { ingredientsKey: key },
       update: {
-        result_json: finalResult,
-        created_at: new Date(),
+        resultJson: finalResult,
+        createdAt: new Date(),
       },
       create: {
-        ingredients_key: key,
-        result_json: finalResult,
+        ingredientsKey: key,
+        resultJson: finalResult,
       },
     });
 

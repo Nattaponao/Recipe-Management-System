@@ -3,20 +3,30 @@ import { prisma } from "@/lib/prisma";
 
 export async function PUT(req: Request) {
   const body = await req.json().catch(() => ({}));
+
   const slot = Number(body.slot);
   const recipeId = String(body.recipeId ?? "");
 
   if (![1, 2, 3, 4, 5].includes(slot)) {
     return NextResponse.json({ message: "invalid slot" }, { status: 400 });
   }
+
   if (!recipeId) {
     return NextResponse.json({ message: "missing recipeId" }, { status: 400 });
   }
 
-  const row = await prisma.popular_cards.upsert({
+  const row = await prisma.popularCard.upsert({
     where: { slot },
-    update: { recipe_id: recipeId },
-    create: { slot, recipe_id: recipeId },
+
+    update: {
+      recipeId: recipeId,
+    },
+
+    create: {
+      slot: slot,
+      recipeId: recipeId,
+    },
+
     include: {
       recipe: {
         select: {
@@ -26,8 +36,20 @@ export async function PUT(req: Request) {
           coverImage: true,
           category: true,
           createdAt: true,
-          author: { select: { id: true, name: true, email: true } },
-          _count: { select: { recipe_likes: true } },
+
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+
+          _count: {
+            select: {
+              recipeLikes: true,
+            },
+          },
         },
       },
     },
@@ -37,7 +59,7 @@ export async function PUT(req: Request) {
     slot,
     recipe: {
       ...row.recipe,
-      likesCount: row.recipe._count?.recipe_likes ?? 0,
+      likesCount: row.recipe._count?.recipeLikes ?? 0,
     },
   });
 }

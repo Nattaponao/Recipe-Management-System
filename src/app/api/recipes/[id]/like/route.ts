@@ -26,14 +26,14 @@ export async function GET(
   const userId = getUserIdFromToken(token);
 
   const liked = userId
-    ? await prisma.recipe_likes.findFirst({
-        where: { recipe_id: recipeId, user_id: userId },
+    ? await prisma.recipeLike.findFirst({
+        where: { recipeId: recipeId, userId: userId },
         select: { id: true },
       })
     : null;
 
-  const count = await prisma.recipe_likes.count({
-    where: { recipe_id: recipeId },
+  const count = await prisma.recipeLike.count({
+    where: { recipeId: recipeId },
   });
 
   return NextResponse.json({ liked: Boolean(liked), count });
@@ -53,21 +53,21 @@ export async function POST(
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const existing = await prisma.recipe_likes.findFirst({
-    where: { recipe_id: recipeId, user_id: userId },
+  const existing = await prisma.recipeLike.findFirst({
+    where: { recipeId: recipeId, userId: userId },
     select: { id: true },
   });
 
   if (existing) {
-    await prisma.recipe_likes.delete({ where: { id: existing.id } });
+    await prisma.recipeLike.delete({ where: { id: existing.id } });
   } else {
-    await prisma.recipe_likes.create({
-      data: { recipe_id: recipeId, user_id: userId },
+    await prisma.recipeLike.create({
+      data: { recipeId: recipeId, userId: userId },
     });
   }
 
-  const count = await prisma.recipe_likes.count({
-    where: { recipe_id: recipeId },
+  const count = await prisma.recipeLike.count({
+    where: { recipeId: recipeId },
   });
 
   return NextResponse.json({ liked: !Boolean(existing), count });

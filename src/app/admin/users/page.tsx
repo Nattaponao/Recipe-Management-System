@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
-import { isAdminByEmail } from '@/lib/admin';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import RoleSelect from '@/components/admin/RoleSelect';
+import { Suspense } from 'react';
 
 type Props = {
   searchParams?: Promise<{ q?: string }>;
@@ -16,27 +13,8 @@ function normalizeQ(q: string) {
   return q.toLowerCase().trim();
 }
 
-async function requireAdmin() {
-  const cookieStore = await cookies();
-  const token = cookieStore.getAll().find((c) => c.name === 'token')?.value;
-  if (!token) redirect('/login');
-
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    const email = String(payload?.email ?? '');
-    if (!(await isAdminByEmail(email))) redirect('/');
-    return { email };
-  } catch {
-    redirect('/login');
-  }
-}
-
-export default async function AdminUsersPage({ searchParams }: Props) {
-  await requireAdmin();
-
-  const sp = (await searchParams) ?? {};
-  const q = normalizeQ(sp.q ?? '');
-
+// 🌟 1. แยกส่วนตารางออกมาดึง Database ต่างหาก
+async function UserTable({ q }: { q: string }) {
   const users = await prisma.user.findMany({
     where: q
       ? {
@@ -52,8 +30,83 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   });
 
   return (
+    <>
+      <div className="px-5 py-4 flex items-center justify-between">
+        <div className="text-[#637402] font-semibold">
+          Users ({users.length})
+        </div>
+        <div className="text-sm text-[#637402]/60">
+          แสดงสูงสุด 200 รายการ
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="text-left text-[#637402] border-b-2 border-[#637402]/20">
+              <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
+                Email
+              </th>
+              <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
+                Set permissions
+              </th>
+              <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider text-right">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-[#637402]/10">
+            {users.map((u: (typeof users)[number]) => (
+              <tr key={u.id} className="hover:bg-[#F9F7EB]">
+                <td className="p-4 text-[#637402] font-semibold">
+                  {u.name ?? '-'}
+                </td>
+                <td className="p-4 text-[#637402]/80">{u.email}</td>
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    <RoleSelect id={u.id} role={u.role ?? 'USER'} />
+                    <span className="text-xs text-gray-500">
+                      {u.role ?? 'USER'}
+                    </span>
+                  </div>
+                </td>
+                <td className="p-4">
+                  <div className="flex justify-end">
+                    <DeleteUserButton id={u.id} />
+                  </div>
+                </td>
+              </tr>
+            ))}
+
+            {users.length === 0 && (
+              <tr>
+                <td className="p-6 text-[#637402]/70" colSpan={4}>
+                  ไม่พบผู้ใช้ตามคำค้นหา
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+// 🌟 2. หน้าหลัก (โชว์โครงสร้างและช่องค้นหาทันที)
+export default async function AdminUsersPage({ searchParams }: Props) {
+  // ❌ ลบ requireAdmin() ออก เพราะ layout.tsx จัดการปกป้องหน้านี้ไว้แล้ว!
+  
+  const sp = (await searchParams) ?? {};
+  const q = normalizeQ(sp.q ?? '');
+
+  return (
     <div className="min-h-screen bg-[#F9F7EB]">
       <div className="container mx-auto px-4 py-10">
+        
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
@@ -65,14 +118,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
             </p>
           </div>
 
-          <div className="flex gap-3">
-            <Link
-              href="/admin"
-              className="border border-[#637402] text-[#637402] px-5 py-2 rounded-lg hover:bg-[#DFD3A4]/40 transition"
-            >
-              ← Back to Dashboard
-            </Link>
-          </div>
+          
         </div>
 
         {/* Search */}
@@ -92,6 +138,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
 
             <button
               type="submit"
+              aria-label="ค้นหาผู้ใช้" // 🌟 เพิ่ม aria-label ให้ Lighthouse ให้คะแนน 100 เต็ม
               className="bg-[#637402] text-white px-6 py-2 rounded-lg hover:opacity-90 transition md:self-end cursor-pointer"
             >
               <svg
@@ -99,6 +146,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   fill="#fff"
@@ -109,70 +157,24 @@ export default async function AdminUsersPage({ searchParams }: Props) {
           </div>
         </form>
 
-        {/* Table */}
-        <div className="mt-6 bg-white rounded-lg border border-[#637402]/20 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 flex items-center justify-between">
-            <div className="text-[#637402] font-semibold">
-              Users ({users.length})
-            </div>
-            <div className="text-sm text-[#637402]/60">
-              แสดงสูงสุด 200 รายการ
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-[#637402] border-b-2 border-[#637402]/20">
-                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-sm uppercase tracking-wider text-right">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-[#637402]/10">
-                {users.map((u: (typeof users)[number]) => (
-                  <tr key={u.id} className="hover:bg-[#F9F7EB]">
-                    <td className="p-4 text-[#637402] font-semibold">
-                      {u.name ?? '-'}
-                    </td>
-                    <td className="p-4 text-[#637402]/80">{u.email}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <RoleSelect id={u.id} role={u.role ?? 'USER'} />
-                        <span className="text-xs text-gray-500">
-                          {u.role ?? 'USER'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex justify-end">
-                        <DeleteUserButton id={u.id} />
-                      </div>
-                    </td>
-                  </tr>
+        {/* Table + Suspense */}
+        <div className="mt-6 bg-white rounded-lg border border-[#637402]/20 shadow-sm overflow-hidden min-h-[300px]">
+          {/* 🌟 ใส่ key={q} เพื่อให้ Skeleton ทำงานใหม่ทุกครั้งที่มีการกดค้นหาคำใหม่ */}
+          <Suspense 
+            key={q} 
+            fallback={
+              <div className="p-10 space-y-4">
+                <div className="h-8 w-48 bg-gray-200 animate-pulse rounded" />
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-12 w-full bg-gray-100 animate-pulse rounded" />
                 ))}
-
-                {users.length === 0 && (
-                  <tr>
-                    <td className="p-6 text-[#637402]/70" colSpan={4}>
-                      ไม่พบผู้ใช้ตามคำค้นหา
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              </div>
+            }
+          >
+            <UserTable q={q} />
+          </Suspense>
         </div>
+        
       </div>
     </div>
   );

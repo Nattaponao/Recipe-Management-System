@@ -10,14 +10,20 @@ export async function PUT(req: Request) {
   if (![1, 2, 3, 4].includes(slot)) {
     return NextResponse.json({ message: "Invalid slot" }, { status: 400 });
   }
+
   if (!recipeId) {
     return NextResponse.json({ message: "Missing recipeId" }, { status: 400 });
   }
 
-  await prisma.featured_cards.upsert({
+  await prisma.featuredCard.upsert({
     where: { slot },
-    create: { slot, recipe_id: recipeId },
-    update: { recipe_id: recipeId },
+    create: {
+      slot,
+      recipeId: recipeId,   // ✅ ต้อง camelCase
+    },
+    update: {
+      recipeId: recipeId,   // ✅ ต้อง camelCase
+    },
   });
 
   return NextResponse.json({ ok: true });

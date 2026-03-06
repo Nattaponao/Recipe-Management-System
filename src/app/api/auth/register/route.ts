@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       data: {
         name: String(name),
         email: normalizedEmail,
-        password_hashed: passwordHash,
+        passwordHashed: passwordHash,
         image: '/userprofile.png',
       },
     });

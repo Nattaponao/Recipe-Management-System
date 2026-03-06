@@ -26,8 +26,8 @@ export async function GET(
   const userId = getUserIdFromToken(token);
 
   const saved = userId
-    ? await prisma.recipe_saves.findFirst({
-        where: { recipe_id: recipeId, user_id: userId },
+    ? await prisma.recipeSave.findFirst({
+        where: { recipeId: recipeId, userId: userId },
         select: { id: true },
       })
     : null;
@@ -49,16 +49,16 @@ export async function POST(
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const existing = await prisma.recipe_saves.findFirst({
-    where: { recipe_id: recipeId, user_id: userId },
+  const existing = await prisma.recipeSave.findFirst({
+    where: { recipeId: recipeId, userId: userId },
     select: { id: true },
   });
 
   if (existing) {
-    await prisma.recipe_saves.delete({ where: { id: existing.id } });
+    await prisma.recipeSave.delete({ where: { id: existing.id } });
   } else {
-    await prisma.recipe_saves.create({
-      data: { recipe_id: recipeId, user_id: userId },
+    await prisma.recipeSave.create({
+      data: { recipeId: recipeId, userId: userId },
     });
   }
 

@@ -9,7 +9,7 @@ export async function GET() {
       if (url.startsWith('data:')) return null;
       return url;
     }
-    const overrides = await prisma.popular_cards.findMany({
+    const overrides = await prisma.popularCard.findMany({
       include: {
         recipe: {
           select: {
@@ -20,7 +20,7 @@ export async function GET() {
             category: true,
             createdAt: true,
             author: { select: { id: true, name: true, email: true } },
-            _count: { select: { recipe_likes: true } },
+            _count: { select: { recipeLikes: true } },
           },
         },
       },
@@ -37,7 +37,7 @@ export async function GET() {
     const topLiked = await prisma.recipe.findMany({
       where: { id: { notIn: Array.from(usedIds) } },
       take: 20,
-      orderBy: { recipe_likes: { _count: 'desc' } },
+      orderBy: { recipeLikes: { _count: 'desc' } },
       select: {
         id: true,
         name: true,
@@ -46,7 +46,7 @@ export async function GET() {
         category: true,
         createdAt: true,
         author: { select: { id: true, name: true, email: true } },
-        _count: { select: { recipe_likes: true } },
+        _count: { select: { recipeLikes: true } },
       },
     });
 

@@ -3,7 +3,6 @@
 
 import Link from 'next/link';
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -19,29 +18,40 @@ function FormLogin() {
     e.preventDefault();
     setError('');
     setMessage('');
+    setLoading(true);
 
     try {
-      setLoading(true);
+      // 🌟 ใช้ fetch ธรรมดา เพื่อลดภาระ bundle size (ไม่ต้องง้อ axios)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const res = await axios.post('/api/auth/login', { email, password });
+      const data = await res.json();
 
-      setMessage(res.data?.message || 'Login Success!!');
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
 
-      const role = res.data?.user?.role as string | undefined;
+      setMessage(data.message || 'Login Success!!');
+      const role = data.user?.role as string | undefined;
 
       // clear form
       setEmail('');
       setPassword('');
-      (e.target as HTMLFormElement).reset();
 
-      // redirect by role from DB
+      // 🌟 โคตรสำคัญ! ต้องสั่ง refresh เพื่อให้ Server Components (เช่น Navbar) รู้ตัวว่ามี Cookie ใหม่แล้ว
+      router.refresh();
+
+      // redirect by role
       if (role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push('/');
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Login failed');
+      setError(err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -49,14 +59,15 @@ function FormLogin() {
 
   return (
     <div>
-      <div className="grid grid-cols-3 mt-9 pb-14">
-        <div className="col-span-1">
-          <form onSubmit={handleSubmit}>
-            <label className="font-semibold text-xl text-black" htmlFor="email">
+      {/* 🌟 ปรับ Layout ให้เป็น 1 column ในมือถือ และ 3 columns ในจอใหญ่ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 mt-9 pb-14 gap-8">
+        <div className="md:col-span-1 flex flex-col justify-center">
+          <form onSubmit={handleSubmit} className="w-full max-w-sm mx-auto md:mx-0">
+            <label className="font-semibold text-xl text-black block" htmlFor="email">
               Email
             </label>
             <input
-              className="block p-1.5 border border-black outline-0 rounded-sm w-85 mt-4 mb-6 text-gray-400"
+              className="block p-2 border border-black outline-0 rounded-lg w-full mt-2 mb-6 text-gray-700 focus:border-[#637402]"
               type="email"
               id="email"
               placeholder="Enter your email"
@@ -65,14 +76,11 @@ function FormLogin() {
               required
             />
 
-            <label
-              className="font-semibold text-xl text-black"
-              htmlFor="password"
-            >
+            <label className="font-semibold text-xl text-black block" htmlFor="password">
               Password
             </label>
             <input
-              className="block p-1.5 border border-black outline-0 rounded-sm w-85 mt-4 text-gray-400"
+              className="block p-2 border border-black outline-0 rounded-lg w-full mt-2 text-gray-700 focus:border-[#637402]"
               type="password"
               id="password"
               placeholder="Enter your password"
@@ -81,39 +89,42 @@ function FormLogin() {
               required
             />
 
-            <div className="flex gap-2 mt-4 mb-9">
-              <input type="checkbox" className="cursor-pointer" />
-              <p className="text-gray-500">Remember me</p>
+            <div className="flex items-center gap-2 mt-4 mb-9">
+              {/* 🌟 ผูก id ให้ checkbox จะได้กดที่ตัวหนังสือแล้วติ๊กถูกได้เลย */}
+              <input type="checkbox" id="remember" className="cursor-pointer w-4 h-4 accent-[#637402]" />
+              <label htmlFor="remember" className="text-gray-500 cursor-pointer select-none">
+                Remember me
+              </label>
             </div>
 
-            {error && <p className="text-red-600">{error}</p>}
-            {message && <p className="text-green-700">{message}</p>}
+            {error && <p className="text-red-600 mb-4 bg-red-50 p-3 rounded-lg text-sm">{error}</p>}
+            {message && <p className="text-green-700 mb-4 bg-green-50 p-3 rounded-lg text-sm">{message}</p>}
 
             <button
               type="submit"
-              className="bg-[#637402] text-white w-85 py-1.5 rounded-2xl cursor-pointer transition-all hover:bg-[#505e01]"
+              className="bg-[#637402] text-white w-full py-2.5 rounded-2xl cursor-pointer transition-all hover:bg-[#505e01] disabled:opacity-50 font-semibold"
               disabled={loading}
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
 
-            <p className="font-extralight my-1.5 text-black">
+            <p className="font-light mt-6 text-black text-center md:text-left text-sm">
               Not registered yet?{' '}
-              <Link className="text-[#FE9F4D] hover:underline" href="/register">
+              <Link className="text-[#FE9F4D] hover:underline font-medium" href="/register">
                 Create an account
-              </Link>{' '}
-              Sign up
+              </Link>
             </p>
           </form>
         </div>
 
-        <div className="hidden md:flex col-span-2 items-start justify-end pr-6">
+        <div className="hidden md:flex md:col-span-2 items-center justify-end pr-6">
           <Image
             src="/logo.svg"
             alt="Logo"
             width={580}
             height={580}
-            className="w-145"
+            className="w-full max-w-[450px] object-contain"
+            priority // 🌟 โหลดโลโก้ทันที ไม่ต้องรอ Lazy load
           />
         </div>
       </div>

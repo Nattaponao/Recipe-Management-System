@@ -43,11 +43,11 @@ export async function PUT(req: Request) {
 
     const userWithPass = await prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { password_hashed: true },
+      select: { passwordHashed: true },
     });
     const ok = await bcrypt.compare(
       currentPassword,
-      userWithPass?.password_hashed ?? '',
+      userWithPass?.passwordHashed ?? '',
     );
     if (!ok)
       return NextResponse.json(

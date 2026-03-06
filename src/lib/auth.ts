@@ -24,11 +24,11 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        if (!user || !user.password_hashed) return null;
+        if (!user || !user.passwordHashed) return null;
 
         const isValid = await bcrypt.compare(
           credentials.password,
-          user.password_hashed,
+          user.passwordHashed,
         );
 
         if (!isValid) return null;

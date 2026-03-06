@@ -9,7 +9,7 @@ export async function GET() {
       if (url.startsWith('data:')) return null;
       return url;
     }
-    const rows = await prisma.featured_cards.findMany({
+    const rows = await prisma.featuredCard.findMany({
       include: {
         recipe: {
           select: {

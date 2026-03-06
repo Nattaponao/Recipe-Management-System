@@ -21,19 +21,19 @@ export async function POST(req: Request) {
         id: true,
         name: true,
         email: true,
-        password_hashed: true,
+        passwordHashed: true,
         role: true,
       },
     });
 
-    if (!user?.password_hashed) {
+    if (!user?.passwordHashed) {
       return NextResponse.json(
         { message: 'Invalid credentials' },
         { status: 401 },
       );
     }
 
-    const ok = await bcrypt.compare(String(password), user.password_hashed);
+    const ok = await bcrypt.compare(String(password), user.passwordHashed);
 
     if (!ok) {
       return NextResponse.json(

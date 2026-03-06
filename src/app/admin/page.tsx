@@ -93,19 +93,19 @@ async function DashboardContent() {
     }),
 
     prisma.recipe.findMany({
-      take: 5,
-      orderBy: { recipe_likes: { _count: 'desc' } },
+      take: 10,
+      orderBy: { recipeLikes: { _count: 'desc' } },
       select: {
         id: true,
         name: true,
         coverImage: true,
         category: true,
         country: true,
-        _count: { select: { recipe_likes: true } },
+        _count: { select: { recipeLikes: true } },
       },
     }),
 
-    prisma.recipe_likes.count(),
+    prisma.recipeLike.count(),
 
     prisma.recipe.count({ where: { createdAt: { gte: from7 } } }),
 
@@ -126,7 +126,7 @@ async function DashboardContent() {
     coverImage: r.coverImage,
     category: r.category,
     country: r.country,
-    likeCount: r._count?.recipe_likes ?? 0,
+    likeCount: r._count?.recipeLikes ?? 0,
   }));
 
   const dayKeys: string[] = [];
@@ -151,7 +151,10 @@ async function DashboardContent() {
   });
 
   const byCategory = recipeByCategory
-    .map((x) => ({ name: x.category ?? 'Uncategorized', count: x._count._all }))
+    .map((x) => ({
+      name: x?.category ?? 'Uncategorized',
+      count: x?._count?._all ?? 0,
+    }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
@@ -198,7 +201,7 @@ async function DashboardContent() {
           </div>
         </div>
 
-       
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8 min-w-0">
@@ -294,7 +297,7 @@ async function DashboardContent() {
 // ==========================================
 export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('token')?.value; 
+  const token = cookieStore.get('token')?.value;
   if (!token) redirect('/login');
 
   let adminEmail = '';
@@ -308,7 +311,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      
+
       {/* Header (แสดงผลทันทีแบบ Instant) */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
@@ -320,30 +323,20 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="flex gap-3">
-          <Link
-            href="/admin/users"
-            className="bg-[#637402] text-white px-5 py-2 rounded-2xl hover:opacity-90 transition"
-          >
-            Manage Users
-          </Link>
-          <Link
-            href="/admin/recipes"
-            className="border border-[#637402] text-[#637402] px-5 py-2 rounded-2xl hover:bg-[#DFD3A4]/40 transition"
-          >
-            Manage Recipes
-          </Link>
-        </div>
+
       </div>
 
       {/* 🌟 โชว์โครง Skeleton พรางตาระหว่าง Database วิ่งหาข้อมูล */}
+
       <Suspense fallback={
         <div className="mt-8 space-y-8 animate-pulse">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
+          {/* 🌟 แก้ตรงนี้: เปลี่ยน md:grid-cols-4 เป็น md:grid-cols-3 และ Array(4) เป็น Array(3) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
               <div key={i} className="h-32 bg-white/60 rounded-3xl border border-[#637402]/10" />
             ))}
           </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-8 h-[400px] bg-white/60 rounded-3xl border border-[#637402]/10" />
             <div className="lg:col-span-4 h-[400px] bg-white/60 rounded-3xl border border-[#637402]/10" />
