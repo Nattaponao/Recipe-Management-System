@@ -2,12 +2,24 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { fredoka } from '@/lib/fonts';
 
 type NavItem = { label: string; href: string };
 
-export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
+type User = {
+  name?: string | null;
+  image?: string | null;
+};
+
+export default function NavbarV2({
+  isAdmin = false,
+  user,
+}: {
+  isAdmin?: boolean;
+  user?: User | null;
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -15,23 +27,21 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
     { label: 'Home', href: '/' },
     { label: 'Recipes', href: '/recipes' },
     { label: 'Ai', href: '/ai' },
-    { label: 'Profile', href: '/profile' },
   ];
 
   const adminMenu: NavItem[] = [
     { label: 'Home', href: '/' },
-    { label: 'Recipes', href: '/admin/recipes' },
+    { label: 'Manage Recipes', href: '/admin/recipes' },
     { label: 'Dashboard', href: '/admin' },
-    { label: 'Users', href: '/admin/users' },
+    { label: 'Manage Users', href: '/admin/users' },
   ];
 
   const menu = isAdmin ? adminMenu : userMenu;
 
-  // user: สีเขียวแค่ / และ /ai
   const userGreenPages = ['/', '/ai'];
   const isGreen = isAdmin
-    ? pathname === '/' // admin: เขียวแค่ /
-    : userGreenPages.includes(pathname); // user: เขียวแค่ / และ /ai
+    ? pathname === '/'
+    : userGreenPages.includes(pathname);
 
   const bg = isGreen ? 'bg-[#637402]' : 'bg-[#F9F7EB]';
   const textColor = isGreen ? 'text-white' : 'text-[#637402]';
@@ -46,7 +56,7 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
             Khang Saeb
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-8">
             <ul className="hidden md:flex font-semibold items-center">
               {menu.map((item) => (
                 <li key={item.label} className="ml-12 text-[24px]">
@@ -59,6 +69,45 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
                 </li>
               ))}
             </ul>
+
+            {/* Profile */}
+            {user ? (
+              <Link
+                href="/profile"
+                className="hidden md:flex items-center ml-8 hover:opacity-80 transition-opacity"
+              >
+                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-current">
+                  <Image
+                    src={user.image ?? '/userprofile.png'}
+                    alt={user.name ?? 'profile'}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                  />
+                </div>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden md:block ml-8 text-[18px] font-semibold px-5 py-2 rounded-full transition-all duration-200"
+                style={{
+                  border: `2px solid ${isGreen ? 'white' : '#637402'}`,
+                  color: isGreen ? 'white' : '#637402',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = isGreen
+                    ? 'white'
+                    : '#637402';
+                  e.currentTarget.style.color = isGreen ? '#637402' : 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = isGreen ? 'white' : '#637402';
+                }}
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           <button
@@ -88,6 +137,13 @@ export default function NavbarV2({ isAdmin = false }: { isAdmin?: boolean }) {
                 </Link>
               </li>
             ))}
+            {user && (
+              <li className="text-[18px]">
+                <Link href="/profile" onClick={() => setOpen(false)}>
+                  สวัสดี, {user.name?.split(' ')[0] ?? 'คุณ'}
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </nav>
