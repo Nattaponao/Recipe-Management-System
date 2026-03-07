@@ -5,15 +5,18 @@ import { jwtVerify } from 'jose';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  const isAdminRoute =
+    pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
   const isProfileRoute = pathname.startsWith('/profile');
+  const isUserOnlyRoute =
+    pathname.startsWith('/recipes') ||
+    pathname.startsWith('/ai') ||
+    isProfileRoute;
 
-  // 🌟 จุดสำคัญ: ถ้าไม่ใช่หน้าที่ต้องป้องกัน ให้ผ่านไปทันทีแบบไม่แตะ Header
-  if (!isAdminRoute && !isProfileRoute) {
+  if (!isAdminRoute && !isUserOnlyRoute) {
     return NextResponse.next();
   }
 
-  // ส่วน Admin / Profile ค่อยมาเช็ค JWT
   const token = req.cookies.get('token')?.value;
 
   if (!token) {
@@ -25,9 +28,26 @@ export async function middleware(req: NextRequest) {
 
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-    await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, secret);
+    const role = (payload as { role?: string }).role;
+
+    if (isUserOnlyRoute && role === 'ADMIN') {
+      return NextResponse.redirect(new URL('/admin', req.url));
+    }
+
+    if (isUserOnlyRoute && role === 'ADMIN') {
+      if (pathname.startsWith('/recipes')) {
+        return NextResponse.redirect(new URL('/admin/recipes', req.url));
+      }
+      return NextResponse.redirect(new URL('/admin', req.url));
+    }
+
+    if (isAdminRoute && role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+
     return NextResponse.next();
-  } catch (err) {
+  } catch {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     const res = NextResponse.redirect(url);
@@ -36,7 +56,12 @@ export async function middleware(req: NextRequest) {
   }
 }
 
-// 🌟 เน้น Matcher เฉพาะจุดที่ต้องการ Security จริงๆ
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*', '/profile/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/api/admin/:path*',
+    '/profile/:path*',
+    '/recipes/:path*',
+    '/ai/:path*',
+  ],
 };
