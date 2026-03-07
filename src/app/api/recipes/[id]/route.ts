@@ -40,7 +40,6 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
     description,
     category,
     country,
-    tags,
     coverImage,
     ingredients,
     steps,
@@ -58,7 +57,6 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
         description: description || null,
         category: category || null,
         country: country || null,
-        tags: tags || null,
         coverImage: coverImage || null,
         ingredients: {
           create: (ingredients ?? []).map(
