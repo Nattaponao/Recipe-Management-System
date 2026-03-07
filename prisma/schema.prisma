@@ -41,7 +41,7 @@ model Recipe {
   coverImage    String?            @map("cover_image")
   category      String?
   country       String?
-  tags          String?
+  isFrozen      Boolean            @default(false) @map("is_frozen")
   authorId      Int?               @map("author_id")
   featuredCards FeaturedCard[]
   popularCards  PopularCard[]
@@ -49,7 +49,7 @@ model Recipe {
   recipeLikes   RecipeLike[]
   recipeSaves   RecipeSave[]
   steps         RecipeStep[]
-  author        User?              @relation(fields: [authorId], references: [id])
+  author        User?              @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@map("recipes")
 }

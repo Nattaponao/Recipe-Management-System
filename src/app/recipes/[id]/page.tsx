@@ -45,6 +45,8 @@ export default async function RecipeDetailPage({ params }: Props) {
 
     if (!recipe) return notFound();
 
+    if (recipe.isFrozen) return notFound();
+
     recipeSafe = JSON.parse(
       JSON.stringify(recipe, (_key, value) => {
         if (typeof value === 'bigint') return value.toString();

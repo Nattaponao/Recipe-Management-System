@@ -7,9 +7,12 @@ export async function GET(req: Request) {
   const category = searchParams.get('category');
 
   const recipes = await prisma.recipe.findMany({
-    where: category
-      ? { category: { contains: category, mode: 'insensitive' } }
-      : undefined,
+    where: {
+      isFrozen: false,
+      ...(category
+        ? { category: { contains: category, mode: 'insensitive' } }
+        : {}),
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -40,7 +43,6 @@ export async function POST(req: Request) {
       coverImage,
       category,
       country,
-      tags,
       authorId,
     } = body;
 
@@ -55,7 +57,6 @@ export async function POST(req: Request) {
         coverImage: coverImage || null,
         category: category || null,
         country: country || null,
-        tags: tags || null,
         authorId: authorId ? Number(authorId) : null,
 
         // RecipeIngredient relation

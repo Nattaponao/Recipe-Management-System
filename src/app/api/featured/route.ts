@@ -18,6 +18,7 @@ export async function GET() {
             coverImage: true,
             category: true,
             createdAt: true,
+            isFrozen: true,
             author: {
               select: { id: true, name: true, email: true, image: true },
             },
@@ -65,7 +66,7 @@ export async function GET() {
 
     const out = [1, 2, 3, 4].map((s) => {
       const r = bySlot.get(s);
-      if (!r) return fallback(s);
+      if (!r || r.recipe.isFrozen) return fallback(s);
       return {
         slot: r.slot,
         recipe: { ...r.recipe, coverImage: stripBase64(r.recipe.coverImage) },

@@ -12,17 +12,12 @@ type Row = {
   category: string | null;
   country: string | null;
   createdAt: Date | string;
+  isFrozen: boolean;
 };
 
 function toDateText(d: Row['createdAt']) {
   const date = typeof d === 'string' ? new Date(d) : d;
-  try {
-    return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(
-      date,
-    );
-  } catch {
-    return date.toISOString().slice(0, 10);
-  }
+  return date.toISOString().slice(0, 10);
 }
 
 export default function ManageRecipesClient({
@@ -72,6 +67,17 @@ export default function ManageRecipesClient({
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       alert(j?.message || 'ลบไม่สำเร็จ');
+      return;
+    }
+    router.refresh();
+  }
+
+  async function handleFreeze(id: string) {
+    const res = await fetch(`/api/admin/recipes/${id}/freeze`, {
+      method: 'POST',
+    });
+    if (!res.ok) {
+      alert('ดำเนินการไม่สำเร็จ');
       return;
     }
     router.refresh();
@@ -176,8 +182,16 @@ export default function ManageRecipesClient({
                     className="w-12 h-12 rounded-2xl object-cover border border-[#637402]/15"
                   />
                   <div>
-                    <div className="text-[#637402] font-semibold">
+                    <div className="text-[#637402] font-semibold flex items-center gap-2">
                       {r.name ?? 'Untitled'}
+                      {r.isFrozen && (
+                        <span
+                          style={{ background: '#dbeafe', color: '#1e40af' }}
+                          className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                        >
+                          ❄️ Freeze
+                        </span>
+                      )}
                     </div>
                     <div className="text-sm text-[#637402]/70 line-clamp-1">
                       {r.description ?? ''}
@@ -219,6 +233,15 @@ export default function ManageRecipesClient({
                       >
                         Edit
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => handleFreeze(r.id)}
+                        style={{ color: r.isFrozen ? '#1d4ed8' : '#ea580c' }}
+                        className="w-full text-left px-4 py-2 cursor-pointer hover:bg-[#DFD3A4]/30"
+                      >
+                        {r.isFrozen ? 'Unfreeze' : 'Freeze'}
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => handleDelete(r.id)}

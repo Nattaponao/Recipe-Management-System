@@ -11,7 +11,7 @@ export default function TopRecipesWidget({ items }: { items: any[] }) {
     // 🌟 เพิ่ม h-full เพื่อให้มันยืดขยายเต็มพื้นที่คอลัมน์ถ้าจำเป็น
     <div className="bg-white rounded-3xl border border-[#637402]/20 shadow-sm p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[#637402] text-xl font-semibold">Top Recipes</h3>
+        <h3 className="text-[#637402] text-xl font-semibold">Top 10 Recipes</h3>
         <Link
           href="/admin/recipes"
           className="text-[#637402] hover:underline font-semibold text-sm"
@@ -20,13 +20,20 @@ export default function TopRecipesWidget({ items }: { items: any[] }) {
         </Link>
       </div>
 
-      <div className="space-y-4 flex-1"> {/* 🌟 ปรับ gap จาก space-y-3 เป็น 4 */}
+      <div className="space-y-4 flex-1">
+        {' '}
+        {/* 🌟 ปรับ gap จาก space-y-3 เป็น 4 */}
         {items.map((r, idx) => (
-          <div key={r.id} className="flex items-center gap-4 group cursor-default">
+          <div
+            key={r.id}
+            className="flex items-center gap-4 group cursor-default"
+          >
             {/* อันดับ - ปรับสีให้เด่นตามลำดับ */}
-            <div className={`w-8 font-bold text-sm ${
-              idx < 3 ? 'text-[#637402]' : 'text-[#637402]/40'
-            }`}>
+            <div
+              className={`w-8 font-bold text-sm ${
+                idx < 3 ? 'text-[#637402]' : 'text-[#637402]/40'
+              }`}
+            >
               {idx < 9 ? `0${idx + 1}` : idx + 1}
             </div>
 
@@ -60,9 +67,10 @@ export default function TopRecipesWidget({ items }: { items: any[] }) {
             </div>
           </div>
         ))}
-
         {items.length === 0 && (
-          <div className="py-10 text-center text-[#637402]/40 text-sm">ยังไม่มีข้อมูล</div>
+          <div className="py-10 text-center text-[#637402]/40 text-sm">
+            ยังไม่มีข้อมูล
+          </div>
         )}
       </div>
     </div>

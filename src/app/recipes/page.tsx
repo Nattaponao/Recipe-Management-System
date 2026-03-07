@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const revalidate = 60; // แคชหน้าเว็บนี้ไว้ 60 วินาที
+export const revalidate = 0; // แคชหน้าเว็บนี้ไว้ 60 วินาที
 import { fredoka } from '@/lib/fonts';
 import { prisma } from '@/lib/prisma';
 import Footer from '@/components/footer';
@@ -26,6 +26,9 @@ export const metadata = {
 export default async function RecipesPage() {
   // 🌟 1. สั่งดึงข้อมูลสูตรอาหารทันที (สังเกตว่าเราเอาคำว่า await ออกก่อน เพื่อไม่ให้มันบล็อกโค้ดบรรทัดต่อไป)
   const recipesPromise = prisma.recipe.findMany({
+    where: {
+      isFrozen: false,
+    },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -44,17 +47,20 @@ export default async function RecipesPage() {
   }
 
   // 🌟 4. ไม้ตาย: สั่งรวบยอด! รอให้การทำงานทั้งสองอย่างเสร็จพร้อมกัน
-  const [recipes, isAdmin] = await Promise.all([recipesPromise, isAdminPromise]);
+  const [recipes, isAdmin] = await Promise.all([
+    recipesPromise,
+    isAdminPromise,
+  ]);
 
   return (
     <div className={fredoka.className}>
-       {/* 🌟 ถ้า Navbar หน้า Recipes สีเฉพาะตัว ให้ใส่สีหลอกไว้ใน fallback */}
-       <Suspense fallback={<div className="h-20 bg-[#F9F7EB] animate-pulse" />}>
-         <NavbarV2 isAdmin={isAdmin} />
-       </Suspense>
+      {/* 🌟 ถ้า Navbar หน้า Recipes สีเฉพาะตัว ให้ใส่สีหลอกไว้ใน fallback */}
+      <Suspense fallback={<div className="h-20 bg-[#F9F7EB] animate-pulse" />}>
+        <NavbarV2 isAdmin={isAdmin} />
+      </Suspense>
 
-       <SearchRecipeClient initialRecipes={recipes ?? []} isAdmin={isAdmin} />
-       <Footer />
+      <SearchRecipeClient initialRecipes={recipes ?? []} isAdmin={isAdmin} />
+      <Footer />
     </div>
   );
 }
