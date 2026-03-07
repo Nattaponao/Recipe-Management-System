@@ -47,6 +47,7 @@ export default function NavbarV2({
   const textColor = isGreen ? 'text-white' : 'text-[#637402]';
   const underlineColor = isGreen ? 'after:bg-white' : 'after:bg-[#637402]';
   const strokeColor = isGreen ? 'white' : '#637402';
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <div className={`${bg} ${fredoka.className}`}>
@@ -69,14 +70,14 @@ export default function NavbarV2({
                 </li>
               ))}
             </ul>
-
-            {/* Profile */}
+            {/* Pro file */}
             {user ? (
-              <Link
-                href="/profile"
-                className="hidden md:flex items-center ml-8 hover:opacity-80 transition-opacity"
-              >
-                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-current">
+              <div className="hidden md:flex items-center ml-8 relative">
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen((v) => !v)}
+                  className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-current hover:opacity-80 transition-opacity cursor-pointer"
+                >
                   <Image
                     src={user.image ?? '/userprofile.png'}
                     alt={user.name ?? 'profile'}
@@ -84,8 +85,48 @@ export default function NavbarV2({
                     className="object-cover"
                     sizes="40px"
                   />
-                </div>
-              </Link>
+                </button>
+
+                {profileOpen && (
+                  <>
+                    <button
+                      type="button"
+                      className="fixed inset-0 z-40"
+                      aria-label="close"
+                      onClick={() => setProfileOpen(false)}
+                    />
+                    <div
+                      className="absolute z-50 w-48 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+                      style={{ top: '110%', right: 0 }}
+                    >
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="font-semibold text-[#637402] text-sm truncate">
+                          {user.name ?? 'ผู้ใช้'}
+                        </p>
+                      </div>
+                      {!isAdmin && (
+                        <Link
+                          href="/profile"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-[#F9F7EB] transition-colors"
+                        >
+                          Profile
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await fetch('/api/auth/logout', { method: 'POST' });
+                          window.location.href = '/';
+                        }}
+                        className="w-full text-left flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"
