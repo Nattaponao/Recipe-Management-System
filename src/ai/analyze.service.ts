@@ -1,19 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { buildAnalyzePrompt } from './prompt.builder';
-import { getAnalyzeModel } from './gemini.client';
-import { safeParseAI } from './ai.parser';
-import { AIAnalyzeResult } from '@/types/ai';
-import { Prisma } from '@prisma/client';
+import { buildRecommendPrompt, RecommendContext } from '@/ai/prompt.builder';
+import { getRecommendModel } from '@/ai/gemini.client';
+import { safeParseAI } from '@/ai/ai.parser';
+import { validateRecommendResult } from '@/ai/ai.validator';
+import { AIRecommendResult, AIRecommendWithMatch } from '@/types/ai';
 import type { GenerativeModel } from '@google/generative-ai';
-
-type RecipeForAnalyze = Prisma.RecipeGetPayload<{
-  select: {
-    id: true;
-    name: true;
-    ingredients: { select: { name: true } };
-    steps: { select: { text: true } };
-  };
-}>;
 
 async function generateWithRetry(
   model: GenerativeModel,
@@ -38,54 +28,46 @@ async function generateWithRetry(
   }
 }
 
-function normalizeAIResult(data: any[]): AIAnalyzeResult[] {
-  return data.map((item) => ({
-    recipeId: String(item.recipeId ?? ''),
-    recipeName: String(item.recipeName ?? ''),
-    matchScore: Math.max(0, Math.min(100, Number(item.matchScore ?? 0))),
-    missingIngredients: Array.isArray(item.missingIngredients)
-      ? item.missingIngredients.map((i: any) => String(i))
-      : [],
-    reason: String(item.reason ?? ''),
-  }));
+type RecipeLite = { id: string; name: string | null };
+
+function normalize(text: string) {
+  return text.trim().toLowerCase().replace(/\s+/g, '');
 }
 
-export async function analyzeRecipes(
-  recipes: RecipeForAnalyze[],
-  userIngredients: string[],
-): Promise<AIAnalyzeResult[]> {
-  const model = getAnalyzeModel();
+function findMatchingRecipe(
+  aiName: string,
+  dbRecipes: RecipeLite[],
+): RecipeLite | null {
+  const ai = normalize(aiName);
+  return (
+    dbRecipes.find((r) => {
+      if (!r.name) return false;
+      const db = normalize(r.name);
+      return db === ai || db.includes(ai) || ai.includes(db);
+    }) ?? null
+  );
+}
 
-  const formattedRecipes = recipes.map((r) => ({
-    id: r.id,
-    name: r.name ?? '',
-    ingredients: r.ingredients.map((i) => i.name ?? '').filter(Boolean),
-    steps: r.steps.map((s) => s.text ?? '').filter(Boolean),
-  }));
-
-  const prompt = buildAnalyzePrompt(formattedRecipes, userIngredients);
+export async function recommendRecipes(
+  context: RecommendContext,
+  dbRecipes: RecipeLite[],
+): Promise<AIRecommendWithMatch[]> {
+  const model = getRecommendModel();
+  const prompt = buildRecommendPrompt(context);
 
   const text = await generateWithRetry(model, prompt);
-
   const parsed = safeParseAI(text);
 
-  if (!Array.isArray(parsed)) {
-    throw new Error('AI did not return array');
+  if (!validateRecommendResult(parsed)) {
+    throw new Error('AI response did not match expected schema');
   }
 
-  const normalized = normalizeAIResult(parsed);
-
-  return formattedRecipes.map((recipe) => {
-    const aiMatch = normalized.find((r) => r.recipeId === recipe.id);
-
-    return (
-      aiMatch ?? {
-        recipeId: recipe.id,
-        recipeName: recipe.name,
-        matchScore: 0,
-        missingIngredients: [],
-        reason: 'ไม่สามารถวิเคราะห์ได้',
-      }
-    );
+  return parsed.map((item: AIRecommendResult) => {
+    const match = findMatchingRecipe(item.recipeName, dbRecipes);
+    return {
+      ...item,
+      dbRecipeId: match?.id ?? null,
+      inLibrary: match !== null,
+    };
   });
 }

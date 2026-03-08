@@ -1,14 +1,28 @@
-export type AIAnalyzeResult = {
-  recipeId: string;
-  recipeName: string;
-  matchScore: number;
-  missingIngredients: string[];
-  reason: string;
+export type AIIngredient = {
+  name: string;
+  amount: string;
 };
 
-export type AIRecipeInput = {
-  id: string;
-  name: string;
-  ingredients: string[];
-  steps: string[];
+export type AIStep = {
+  stepNumber: number;
+  instruction: string;
+};
+
+export type AIRecommendResult = {
+  recipeName: string;
+  originalName?: string;
+  cuisine: string;
+  description: string;
+  spiceLevel: 'mild' | 'medium' | 'hot' | 'very_hot';
+  healthNote: string;
+  servings: string;
+  prepTime: string;
+  cookTime: string;
+  ingredients: AIIngredient[];
+  steps: AIStep[];
+};
+
+export type AIRecommendWithMatch = AIRecommendResult & {
+  dbRecipeId: string | null;
+  inLibrary: boolean;
 };
