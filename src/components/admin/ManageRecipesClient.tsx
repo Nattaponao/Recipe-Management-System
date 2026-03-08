@@ -156,9 +156,9 @@ export default function ManageRecipesClient({
         </div>
 
         {/* Table */}
-        <div className="mt-6 bg-white rounded-3xl border border-[#637402]/20 shadow-sm overflow-hidden">
+        <div className="mt-6 bg-white rounded-3xl border border-[#637402]/20 shadow-sm overflow-visible">
           {/* Header */}
-          <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3 text-[#637402] font-semibold text-sm uppercase tracking-wider border-b-2 border-[#637402]/20">
+          <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3 text-[#637402] font-semibold text-sm uppercase tracking-wider border-b-2 border-[#637402]/20 overflow-hidden">
             <div className="col-span-5">Recipe</div>
             <div className="col-span-2">Category</div>
             <div className="col-span-2">Country</div>
