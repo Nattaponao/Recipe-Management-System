@@ -4,24 +4,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/hooks/useAuth';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type AIIngredient = {
-  name: string;
-  amount: string;
-};
-
-type AIStep = {
-  stepNumber: number;
-  instruction: string;
-};
-
+type AIIngredient = { name: string; amount: string };
+type AIStep = { stepNumber: number; instruction: string };
 type AIResult = {
   recipeName: string;
   originalName?: string;
@@ -39,10 +24,6 @@ type AIResult = {
   coverImage?: string | null;
   dbDescription?: string | null;
 };
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 const SPICE_CONFIG: Record<
   AIResult['spiceLevel'],
@@ -62,10 +43,6 @@ const SPICE_CONFIG: Record<
   },
 };
 
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
-
 function SpiceBadge({ level }: { level: AIResult['spiceLevel'] }) {
   const cfg = SPICE_CONFIG[level] ?? SPICE_CONFIG.mild;
   return (
@@ -77,7 +54,6 @@ function SpiceBadge({ level }: { level: AIResult['spiceLevel'] }) {
   );
 }
 
-// การ์ดรูปใหญ่แบบเดิม — เฉพาะ inLibrary
 function LibraryCard({
   result,
   onNavigate,
@@ -115,7 +91,6 @@ function LibraryCard({
   );
 }
 
-// การ์ด AI แนะนำทั่วไป
 function RecipeCard({
   result,
   onNavigate,
@@ -127,16 +102,17 @@ function RecipeCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const heightStyle =
-    cardHeight && cardHeight > 0 ? { minHeight: `${cardHeight}px` } : {};
+    !expanded && cardHeight && cardHeight > 0
+      ? { minHeight: `${cardHeight}px` }
+      : {};
 
   return (
     <div
-      className="bg-white text-gray-800 rounded-3xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 h-full"
+      data-card
+      className="bg-white text-gray-800 rounded-3xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
       style={heightStyle}
     >
-      {/* Card body */}
       <div className="p-4 flex flex-col gap-3 flex-1">
-        {/* Title row */}
         <div>
           <h3 className="font-bold text-base leading-snug line-clamp-1">
             {result.recipeName}
@@ -147,44 +123,32 @@ function RecipeCard({
             </p>
           )}
         </div>
-
-        {/* Badges row */}
         <div className="flex flex-wrap gap-2 items-center">
           <SpiceBadge level={result.spiceLevel} />
           <span className="text-xs bg-lime-100 text-lime-700 font-semibold px-2 py-0.5 rounded-full">
             🌍 {result.cuisine}
           </span>
         </div>
-
-        {/* Description */}
         <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
           {result.dbDescription || result.description}
         </p>
-
-        {/* Health note */}
         <div className="bg-green-50 border border-green-200 rounded-xl px-3 py-2">
           <p className="text-xs text-green-700 leading-relaxed">
             <span className="font-semibold">💚 สุขภาพ:</span>{' '}
             {result.healthNote}
           </p>
         </div>
-
-        {/* Time & servings */}
         <div className="flex gap-3 text-xs text-gray-500">
           <span>⏱ เตรียม {result.prepTime}</span>
           <span>🔥 ทำ {result.cookTime}</span>
           <span>👤 {result.servings}</span>
         </div>
-
-        {/* Expand toggle */}
         <button
           onClick={() => setExpanded((v) => !v)}
           className="mt-auto w-full text-sm font-semibold text-[#637402] border border-[#637402] rounded-full py-1.5 hover:bg-[#637402] hover:text-white transition-all duration-200 cursor-pointer"
         >
           {expanded ? '▲ ซ่อนสูตร' : '▼ ดูสูตรทำอาหาร'}
         </button>
-
-        {/* Navigate to recipe page (only if inLibrary) */}
         {result.inLibrary && result.dbRecipeId && (
           <button
             onClick={() => onNavigate(result.dbRecipeId!)}
@@ -194,11 +158,8 @@ function RecipeCard({
           </button>
         )}
       </div>
-
-      {/* Expanded recipe section */}
       {expanded && (
         <div className="border-t border-gray-100 px-4 pb-5 pt-4 flex flex-col gap-4 bg-gray-50">
-          {/* Ingredients */}
           <div>
             <h4 className="text-sm font-bold text-gray-700 mb-2">
               🧂 วัตถุดิบ
@@ -215,8 +176,6 @@ function RecipeCard({
               ))}
             </ul>
           </div>
-
-          {/* Steps */}
           <div>
             <h4 className="text-sm font-bold text-gray-700 mb-2">👨‍🍳 วิธีทำ</h4>
             <ol className="space-y-2">
@@ -239,11 +198,6 @@ function RecipeCard({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main Page
-// ---------------------------------------------------------------------------
-
-// Layout component ที่ทำให้ทุกการ์ดสูงเท่ากัน
 function RowsWithEqualHeight({
   row1,
   row2,
@@ -260,19 +214,16 @@ function RowsWithEqualHeight({
     const id = setTimeout(() => {
       if (!containerRef.current) return;
       const cards =
-        containerRef.current.querySelectorAll<HTMLElement>(
-          ':scope > div > div',
-        );
+        containerRef.current.querySelectorAll<HTMLElement>('[data-card]');
       if (cards.length === 0) return;
       const maxH = Math.max(...Array.from(cards).map((c) => c.offsetHeight));
       if (maxH > 0) setCardHeight(maxH);
-    }, 50);
+    }, 150);
     return () => clearTimeout(id);
   }, [row1, row2]);
 
   return (
     <div className="flex flex-col gap-6" ref={containerRef}>
-      {/* แถวบน */}
       <div
         style={{
           display: 'grid',
@@ -290,7 +241,6 @@ function RowsWithEqualHeight({
           />
         ))}
       </div>
-      {/* แถวล่าง */}
       {row2.length > 0 && (
         <div
           style={{
@@ -329,9 +279,7 @@ export default function AIPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading && !authUser) {
-      router.push('/login');
-    }
+    if (!authLoading && !authUser) router.push('/login');
   }, [authUser, authLoading, router]);
 
   if (authLoading) {
@@ -345,43 +293,30 @@ export default function AIPage() {
 
   if (!authUser) return null;
 
-  // --- Search ---
   const handleSearch = async () => {
     const trimmed = userRequest.trim();
     if (!trimmed) return;
-
     setSearched(true);
     setLoading(true);
     setNotFound(false);
     setResults([]);
     setErrorMsg(null);
-
     try {
       const res = await fetch('/api/ai/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userRequest: trimmed,
-          count: 5,
-        }),
+        body: JSON.stringify({ userRequest: trimmed, count: 5 }),
       });
-
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
         throw new Error(json?.error ?? `Error ${res.status}`);
       }
-
       const data = await res.json();
       const list: AIResult[] = data.results ?? [];
-
-      if (list.length === 0) {
-        setNotFound(true);
-      } else {
-        setResults(list);
-      }
+      if (list.length === 0) setNotFound(true);
+      else setResults(list);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'เกิดข้อผิดพลาด';
-      setErrorMsg(msg);
+      setErrorMsg(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
       setNotFound(true);
     } finally {
       setLoading(false);
@@ -397,7 +332,6 @@ export default function AIPage() {
 
   return (
     <div className="min-h-screen bg-[#637402] text-white">
-      {/* Hero section */}
       <section className="text-center pt-24 pb-12 px-4">
         <h1 className="text-6xl md:text-7xl font-extrabold text-yellow-400 drop-shadow-lg">
           AI Chef
@@ -405,19 +339,15 @@ export default function AIPage() {
         <p className="mt-4 text-lg text-lime-100 max-w-2xl mx-auto">
           บอกความต้องการของคุณ แล้ว AI จะแนะนำเมนูพร้อมสูตรให้เลย
         </p>
-
         <div className="mt-10 flex flex-col items-center gap-5 w-full max-w-2xl mx-auto">
-          {/* Free text input */}
           <textarea
             value={userRequest}
             onChange={(e) => setUserRequest(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={3}
-            placeholder="เช่น อยากกินอาหารเผ็ดจากอินเดีย เป็นเบาหวาน, อาหารญี่ปุ่นทำง่าย ไม่แพ้กลูเตน, ของหวานไทยสำหรับคนความดันสูง..."
+            placeholder="เช่น อยากกินอาหารเผ็ดจากอินเดีย เป็นเบาหวาน, อาหารญี่ปุ่นทำง่าย ไม่แพ้กลูเตน..."
             className="w-full bg-white text-gray-700 px-5 py-4 rounded-2xl shadow-md outline-none placeholder:text-gray-400 resize-none text-sm leading-relaxed"
           />
-
-          {/* Search button */}
           <button
             onClick={handleSearch}
             disabled={loading}
@@ -428,7 +358,6 @@ export default function AIPage() {
         </div>
       </section>
 
-      {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center justify-center pb-16 gap-3">
           <div className="animate-spin rounded-full h-14 w-14 border-4 border-yellow-400 border-t-transparent" />
@@ -436,7 +365,6 @@ export default function AIPage() {
         </div>
       )}
 
-      {/* Not found / error */}
       {!loading && searched && notFound && (
         <div className="flex flex-col items-center justify-center pb-20 gap-3">
           <img
@@ -451,22 +379,18 @@ export default function AIPage() {
         </div>
       )}
 
-      {/* Results */}
       {!loading && results.length > 0 && (
         <section className="max-w-5xl mx-auto px-6 pb-40">
           <h2 className="text-center text-2xl font-bold mb-8 text-yellow-300">
             🍴 เมนูแนะนำสำหรับคุณ
           </h2>
-
           {(() => {
             const regular = results.filter((r) => !r.inLibrary);
             const featured = results.filter((r) => r.inLibrary);
             const row1 = regular.slice(0, 3);
             const row2 = regular.slice(3);
-
             return (
               <div className="flex flex-col gap-10">
-                {/* AI แนะนำ — 3 บน + 2 ล่าง */}
                 {regular.length > 0 && (
                   <RowsWithEqualHeight
                     row1={row1}
@@ -474,8 +398,6 @@ export default function AIPage() {
                     onNavigate={(id) => router.push(`/recipes/${id}`)}
                   />
                 )}
-
-                {/* มีในคลัง — การ์ดรูปใหญ่แบบเดิม */}
                 {featured.length > 0 && (
                   <div>
                     <h3 className="text-center text-lg font-bold text-yellow-200 mb-4">
