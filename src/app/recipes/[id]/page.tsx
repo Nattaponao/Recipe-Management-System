@@ -5,6 +5,7 @@ import RecipeDetailClient from './RecipeDetailClient';
 import { fredoka } from '@/lib/fonts';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { getUserFromToken } from '@/lib/getUser';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -57,10 +58,10 @@ export default async function RecipeDetailPage({ params }: Props) {
   } catch {
     return notFound();
   }
-
+  const { user, isAdmin } = await getUserFromToken();
   return (
     <div className={fredoka.className}>
-      <NavbarV2 />
+      <NavbarV2 user={user} />
       <RecipeDetailClient recipe={recipeSafe} />
       <Footer />
     </div>
