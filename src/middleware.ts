@@ -5,28 +5,19 @@ import { jwtVerify } from 'jose';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  console.log('middleware hit:', pathname);
+
   const isAdminRoute =
     pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
-  const isProfileRoute = pathname.startsWith('/profile');
-  const isAiRoute = pathname.startsWith('/ai');
-  const isRecipesRoute = pathname.startsWith('/recipes');
+
+  const isUserOnlyRoute =
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/ai') ||
+    pathname.startsWith('/recipes');
 
   const token = req.cookies.get('token')?.value;
 
-  if (isRecipesRoute) {
-    if (!token) return NextResponse.next();
-    try {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-      const { payload } = await jwtVerify(token, secret);
-      const role = (payload as { role?: string }).role;
-      if (role === 'ADMIN') {
-        return NextResponse.redirect(new URL('/admin/recipes', req.url));
-      }
-    } catch {}
-    return NextResponse.next();
-  }
-
-  if (isAiRoute || isProfileRoute) {
+  if (isUserOnlyRoute) {
     if (!token) {
       const url = req.nextUrl.clone();
       url.pathname = '/login';
@@ -37,10 +28,12 @@ export async function middleware(req: NextRequest) {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
       const { payload } = await jwtVerify(token, secret);
       const role = (payload as { role?: string }).role;
+      console.log('role:', role);
       if (role === 'ADMIN') {
         return NextResponse.redirect(new URL('/admin', req.url));
       }
-    } catch {
+    } catch (e) {
+      console.log('jwt error:', e);
       const url = req.nextUrl.clone();
       url.pathname = '/login';
       return NextResponse.redirect(url);
@@ -79,8 +72,10 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/api/admin/:path*',
+    '/profile',
     '/profile/:path*',
     '/recipes/:path*',
+    '/ai',
     '/ai/:path*',
   ],
 };

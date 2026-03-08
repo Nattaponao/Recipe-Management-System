@@ -3,6 +3,10 @@
 import { fredoka } from '@/lib/fonts';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import countries from 'world-countries';
+const countryList = countries
+  .map((c) => c.name.common)
+  .sort((a, b) => a.localeCompare(b));
 
 interface Ingredient {
   id?: string;
@@ -297,49 +301,51 @@ export default function AdminEditRecipePage() {
                 </div>
               </div>
 
-              {/* COUNTRY & TAGS */}
+              {/* COUNTRY & FOOD TYPE */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[#6B8E23] font-bold mb-2 text-lg">
                     COUNTRY
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full border-2 border-black rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-                  />
+                    className="w-full border-2 border-black rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#6B8E23] cursor-pointer"
+                  >
+                    <option value="" disabled>
+                      -- Select Country --
+                    </option>
+                    {countryList.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-[#6B8E23] font-bold mb-2 text-lg">
-                    TAGS
+                  <label className="block text-[#6B8E23] font-bold mb-3 text-lg">
+                    FOOD TYPE
                   </label>
-                  <input
-                    type="text"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    className="w-full border-2 border-black rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
-                  />
+                  <div className="relative">
+                    <select
+                      value={foodType}
+                      onChange={(e) => setFoodType(e.target.value)}
+                      className="w-full appearance-none border-2 border-black rounded-full px-5 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#6B8E23] cursor-pointer pr-10"
+                    >
+                      <option value="" disabled>
+                        เลือกประเภท
+                      </option>
+                      {FOOD_TYPES.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">
+                      ▼
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              {/* FOOD TYPE */}
-              <div>
-                <label className="block text-[#6B8E23] font-bold mb-3 text-lg">
-                  FOOD TYPE
-                </label>
-                <select
-                  value={foodType}
-                  onChange={(e) => setFoodType(e.target.value)}
-                  className="w-48 appearance-none border-2 border-black rounded-full px-5 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#6B8E23] cursor-pointer"
-                >
-                  <option value="">เลือกประเภท</option>
-                  {FOOD_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* INSERT PICTURE */}

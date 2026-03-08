@@ -2,9 +2,9 @@
 'use client';
 
 import { fredoka } from '@/lib/fonts';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import NavbarV2 from '@/components/navV2';
+import NavbarAuthClient from '@/components/NavbarAuthClient';
 import countries from 'world-countries';
 
 // 🌟 1. ประกาศ Interface สำหรับวัตถุดิบ
@@ -13,11 +13,6 @@ interface Ingredient {
   amount: string;
   unit: string;
 }
-
-// 🌟 2. ดึงรายชื่อประเทศมาเตรียมไว้ (อยู่นอก Component เพื่อประสิทธิภาพ)
-const countryList = countries
-  .map((c) => c.name.common)
-  .sort((a, b) => a.localeCompare(b));
 
 const FOOD_TYPES = [
   'curry',
@@ -32,7 +27,11 @@ const FOOD_TYPES = [
 export default function AddRecipePage() {
   const router = useRouter();
   const [userId, setUserId] = useState<number | null>(null);
-
+  const countryList = useMemo(
+    () =>
+      countries.map((c) => c.name.common).sort((a, b) => a.localeCompare(b)),
+    [],
+  );
   // Auth & User Info
   useEffect(() => {
     fetch('/api/auth/me')
@@ -88,7 +87,11 @@ export default function AddRecipePage() {
   const removeIngredient = (index: number) =>
     setIngredients(ingredients.filter((_, i) => i !== index));
 
-  const updateIngredient = (index: number, field: keyof Ingredient, value: string) => {
+  const updateIngredient = (
+    index: number,
+    field: keyof Ingredient,
+    value: string,
+  ) => {
     const updated = [...ingredients];
     updated[index] = { ...updated[index], [field]: value };
     setIngredients(updated);
@@ -131,7 +134,7 @@ export default function AddRecipePage() {
 
   return (
     <div className={fredoka.className}>
-      <NavbarV2 />
+      <NavbarAuthClient />
 
       <div className="min-h-screen bg-[#F9F7EB] py-16 px-6">
         <div className="max-w-2xl mx-auto">
@@ -155,7 +158,9 @@ export default function AddRecipePage() {
             <form onSubmit={handleSubmit} className="space-y-10">
               {/* NAME */}
               <div>
-                <label className="block text-[#6B8E23] font-bold mb-2 text-lg">Name</label>
+                <label className="block text-[#6B8E23] font-bold mb-2 text-lg">
+                  Name
+                </label>
                 <input
                   type="text"
                   placeholder="Add text"
@@ -168,7 +173,9 @@ export default function AddRecipePage() {
               {/* INGREDIENTS */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <label className="text-[#6B8E23] font-bold text-lg">INGREDIENTS</label>
+                  <label className="text-[#6B8E23] font-bold text-lg">
+                    INGREDIENTS
+                  </label>
                   <button
                     type="button"
                     onClick={addIngredient}
@@ -179,20 +186,31 @@ export default function AddRecipePage() {
                 </div>
 
                 <div className="grid grid-cols-[1fr_90px_90px_32px] gap-2 mb-2 px-1">
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">วัตถุดิบ</span>
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">ปริมาณ</span>
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">หน่วย</span>
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    วัตถุดิบ
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    ปริมาณ
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    หน่วย
+                  </span>
                   <span />
                 </div>
 
                 <div className="space-y-2">
                   {ingredients.map((item, index) => (
-                    <div key={index} className="grid grid-cols-[1fr_90px_90px_32px] gap-2 items-center">
+                    <div
+                      key={index}
+                      className="grid grid-cols-[1fr_90px_90px_32px] gap-2 items-center"
+                    >
                       <input
                         type="text"
                         placeholder="เช่น ไก่, กุ้ง"
                         value={item.name}
-                        onChange={(e) => updateIngredient(index, 'name', e.target.value)}
+                        onChange={(e) =>
+                          updateIngredient(index, 'name', e.target.value)
+                        }
                         className="border-2 border-black rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
                       />
                       <input
@@ -200,14 +218,18 @@ export default function AddRecipePage() {
                         placeholder="100"
                         min="0"
                         value={item.amount}
-                        onChange={(e) => updateIngredient(index, 'amount', e.target.value)}
+                        onChange={(e) =>
+                          updateIngredient(index, 'amount', e.target.value)
+                        }
                         className="border-2 border-black rounded-xl px-3 py-2.5 text-sm text-center text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
                       />
                       <input
                         type="text"
                         placeholder="กรัม"
                         value={item.unit}
-                        onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
+                        onChange={(e) =>
+                          updateIngredient(index, 'unit', e.target.value)
+                        }
                         className="border-2 border-black rounded-xl px-3 py-2.5 text-sm text-center text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6B8E23]"
                       />
                       <button
@@ -225,7 +247,9 @@ export default function AddRecipePage() {
               {/* PREPARATION */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <label className="text-[#6B8E23] font-bold text-lg">PREPARATION</label>
+                  <label className="text-[#6B8E23] font-bold text-lg">
+                    PREPARATION
+                  </label>
                   <button
                     type="button"
                     onClick={addStep}
@@ -267,13 +291,17 @@ export default function AddRecipePage() {
               {/* COUNTRY & FOOD TYPE */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[#6B8E23] font-bold mb-2 text-lg">COUNTRY</label>
+                  <label className="block text-[#6B8E23] font-bold mb-2 text-lg">
+                    COUNTRY
+                  </label>
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     className="w-full border-2 border-black rounded-xl px-4 py-3 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#6B8E23] cursor-pointer"
                   >
-                    <option value="" disabled>-- Select Country --</option>
+                    <option value="" disabled>
+                      -- Select Country --
+                    </option>
                     {countryList.map((countryName) => (
                       <option key={countryName} value={countryName}>
                         {countryName}
@@ -282,7 +310,9 @@ export default function AddRecipePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#6B8E23] font-bold mb-3 text-lg">FOOD TYPE</label>
+                  <label className="block text-[#6B8E23] font-bold mb-3 text-lg">
+                    FOOD TYPE
+                  </label>
                   <div className="relative">
                     <select
                       value={foodType}
@@ -291,24 +321,48 @@ export default function AddRecipePage() {
                     >
                       <option value="">เลือกประเภท</option>
                       {FOOD_TYPES.map((type) => (
-                        <option key={type} value={type}>{type}</option>
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
                       ))}
                     </select>
-                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">▼</span>
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">
+                      ▼
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* INSERT PICTURE */}
               <div>
-                <label className="block text-[#6B8E23] font-bold mb-3 text-lg">INSERT PICTURE</label>
+                <label className="block text-[#6B8E23] font-bold mb-3 text-lg">
+                  INSERT PICTURE
+                </label>
                 <div className="w-full h-52 rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden mb-4">
                   {coverImage ? (
-                    <img src={coverImage} alt="preview" className="w-full h-full object-cover rounded-2xl" />
+                    <img
+                      src={coverImage}
+                      alt="preview"
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-12 h-12"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1}
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="2"
+                          ry="2"
+                        />
                         <circle cx="8.5" cy="8.5" r="1.5" />
                         <polyline points="21 15 16 10 5 21" />
                       </svg>
@@ -318,14 +372,21 @@ export default function AddRecipePage() {
                 <div className="flex justify-center">
                   <label className="cursor-pointer border-2 border-[#6B8E23] text-[#6B8E23] rounded-full px-8 py-2 text-sm font-semibold hover:bg-[#6B8E23] hover:text-white transition">
                     {uploading ? 'กำลัง upload...' : 'Upload picture'}
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
                   </label>
                 </div>
               </div>
 
               {/* DESCRIPTION */}
               <div>
-                <label className="block text-[#6B8E23] font-bold mb-2 text-lg">DESCRIPTION</label>
+                <label className="block text-[#6B8E23] font-bold mb-2 text-lg">
+                  DESCRIPTION
+                </label>
                 <textarea
                   placeholder="Add text"
                   value={description}
