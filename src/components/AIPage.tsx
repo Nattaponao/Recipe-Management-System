@@ -4,6 +4,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/hooks/useAuth';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -123,35 +126,14 @@ function RecipeCard({
   cardHeight?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const heightStyle =
+    cardHeight && cardHeight > 0 ? { minHeight: `${cardHeight}px` } : {};
 
   return (
     <div
-      className="bg-white text-gray-800 rounded-3xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
-      style={{ height: '100%' }}
+      className="bg-white text-gray-800 rounded-3xl shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 h-full"
+      style={heightStyle}
     >
-      {/* Cover image */}
-      <div className="relative h-44 w-full overflow-hidden bg-gray-100 flex-shrink-0">
-        {result.coverImage ? (
-          <img
-            src={result.coverImage}
-            alt={result.recipeName}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-1">
-            <span className="text-4xl">🍽</span>
-            <span className="text-xs">ไม่มีรูปภาพ</span>
-          </div>
-        )}
-
-        {/* inLibrary badge */}
-        {result.inLibrary && (
-          <div className="absolute top-3 left-3 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full shadow flex items-center gap-1">
-            📖 มีในคลังของเรา
-          </div>
-        )}
-      </div>
-
       {/* Card body */}
       <div className="p-4 flex flex-col gap-3 flex-1">
         {/* Title row */}
@@ -271,14 +253,11 @@ function RowsWithEqualHeight({
   row2: AIResult[];
   onNavigate: (id: string) => void;
 }) {
-  const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
+  const [cardHeight, setCardHeight] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // reset ก่อนวัดใหม่
-    setCardHeight(undefined);
-    // รอ 1 frame ให้ render เสร็จก่อนวัด
-    const id = requestAnimationFrame(() => {
+    const id = setTimeout(() => {
       if (!containerRef.current) return;
       const cards =
         containerRef.current.querySelectorAll<HTMLElement>(
@@ -287,8 +266,8 @@ function RowsWithEqualHeight({
       if (cards.length === 0) return;
       const maxH = Math.max(...Array.from(cards).map((c) => c.offsetHeight));
       if (maxH > 0) setCardHeight(maxH);
-    });
-    return () => cancelAnimationFrame(id);
+    }, 50);
+    return () => clearTimeout(id);
   }, [row1, row2]);
 
   return (
@@ -299,6 +278,7 @@ function RowsWithEqualHeight({
           display: 'grid',
           gridTemplateColumns: `repeat(${Math.min(row1.length, 3)}, 1fr)`,
           gap: '24px',
+          alignItems: 'start',
         }}
       >
         {row1.map((r, idx) => (
@@ -317,6 +297,7 @@ function RowsWithEqualHeight({
             display: 'grid',
             gridTemplateColumns: `repeat(${row2.length}, 1fr)`,
             gap: '24px',
+            alignItems: 'start',
             maxWidth: '672px',
             margin: '0 auto',
             width: '100%',
