@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const revalidate = 0; // แคชหน้าเว็บนี้ไว้ 60 วินาที
+export const revalidate = 60; // แคชหน้าเว็บนี้ไว้ 60 วินาที
 import { fredoka } from '@/lib/fonts';
 import { prisma } from '@/lib/prisma';
 import Footer from '@/components/footer';
