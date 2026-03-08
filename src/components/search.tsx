@@ -29,9 +29,6 @@ export default function SearchRecipeClient({
   const [category, setCategory] = useState('');
   const [country, setCountry] = useState('');
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   const [recipes, setRecipes] = useState<RecipeCard[]>(initialRecipes);
   const [loading, setLoading] = useState(false);
 
@@ -69,7 +66,6 @@ export default function SearchRecipeClient({
   );
 
   useEffect(() => {
-    if (!mounted) return;
     const t = setTimeout(async () => {
       setLoading(true);
       try {
@@ -87,7 +83,7 @@ export default function SearchRecipeClient({
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [mounted, query, category, country]);
+  }, [query, category, country]);
 
   // suppress unused warning
   void recipes;
@@ -275,14 +271,18 @@ export default function SearchRecipeClient({
                     aria-label={`ดูสูตร ${r.name}`}
                   >
                     <div className="text-black rounded-2xl bg-[#FEFEF6] overflow-hidden group flex flex-col h-full hover:shadow-lg hover:translate-y-[-4px] transition-all duration-300">
-                      <div className="relative h-48 overflow-hidden">
+                      <div className="relative h-48 overflow-hidden bg-gray-100">
                         <Image
-                          src={r.coverImage ?? 'https://picsum.photos/seed/food/800/500'}
+                          src={
+                            r.coverImage ??
+                            'https://picsum.photos/seed/food/800/500'
+                          }
                           alt={`ภาพปกสูตร ${r.name}`}
                           fill // 🌟 ใช้ fill เพื่อให้รูปเต็มกรอบ h-48
                           sizes="(max-width: 768px) 100vw, 25vw" // 🌟 ช่วยให้เบราว์เซอร์เลือกขนาดรูปที่เหมาะสม
                           className="object-cover transition-transform duration-300 ease-out group-hover:scale-110"
                           priority={index < 4} // 🌟 รูป 4 ใบแรกโหลดแบบ VIP ทันที
+                          placeholder="empty"
                         />
                       </div>
 
