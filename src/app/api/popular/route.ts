@@ -19,6 +19,7 @@ export async function GET() {
             coverImage: true,
             category: true,
             createdAt: true,
+            isFrozen: true,
             author: { select: { id: true, name: true, email: true } },
             _count: { select: { recipeLikes: true } },
           },
@@ -30,12 +31,13 @@ export async function GET() {
     const bySlot = new Map<number, any>();
     const usedIds = new Set<string>();
     for (const r of overrides) {
+      if (r.recipe.isFrozen) continue;
       bySlot.set(r.slot, r.recipe);
       usedIds.add(r.recipe.id);
     }
 
     const topLiked = await prisma.recipe.findMany({
-      where: { id: { notIn: Array.from(usedIds) } },
+      where: { id: { notIn: Array.from(usedIds) }, isFrozen: false },
       take: 20,
       orderBy: { recipeLikes: { _count: 'desc' } },
       select: {
